@@ -1,0 +1,199 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#182b49">
+  <meta name="description" content="Connect wearer keywords and reconstructed loudspeaker speech to explore evidence-based privacy inference with Painting U.">
+  <title>Vib²Eve / Painting U · Research Evidence Workspace</title>
+  <link rel="icon" href="../favicon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="assets/style.css">
+  <script src="assets/engine.js" defer></script>
+  <script src="assets/app.js" defer></script>
+</head>
+<body>
+  <div class="shell"><div class="project-bar"><a href="../index.html">Vib<sup>2</sup>Eve</a><span>/ Painting U</span><a class="project-note" href="../index.html#prompt">Prompt & methodology ↗</a></div>
+    <header class="top">
+      <div class="mark" aria-hidden="true">P</div>
+      <div class="brand">
+        <p class="kicker">RESEARCH EVIDENCE WORKSPACE</p>
+        <h1>Painting U</h1>
+        <p class="tagline">Inspect conversation fragments, attribution, and tentative inferences.</p>
+      </div>
+      <nav class="language-switch" aria-label="Language">
+        <a href="index.html" lang="en" aria-current="page">EN</a>
+        <a href="zh.html" lang="zh-CN">中文</a>
+      </nav>
+      <div class="actions">
+        <button class="btn" id="importBtn" type="button">Import JSON</button>
+        <input id="importFile" type="file" accept="application/json,.json" aria-label="Import evidence JSON file" hidden>
+        <button class="btn" id="exportBtn" type="button">Export evidence</button>
+      </div>
+    </header>
+
+<aside class="example-banner" aria-label="Guided example"><div><p class="kicker">ILLUSTRATIVE WALKTHROUGH</p><h2>Start with a conversation fragment.</h2><p>Load a staged verification exchange, assemble the timeline, then inspect which claims the evidence supports. This is illustrative data, not an experiment result.</p></div><button class="btn primary" id="loadExample" type="button">Load example</button></aside>
+    <nav class="flow" aria-label="Painting U workflow">
+      <a class="flow-item on" id="step1" href="#evidence"><span>01</span> Evidence input</a>
+      <a class="flow-item" id="step2" href="#assembly"><span>02</span> Time assembly</a>
+      <a class="flow-item" id="step3" href="#analysis"><span>03</span> Reasoning</a>
+      <a class="flow-item" id="step4" href="#profile"><span>04</span> Privacy profile</a>
+    </nav>
+
+    <main>
+      <section class="panel" id="evidence" aria-labelledby="evidenceTitle">
+        <div class="panel-head">
+          <div class="panel-title">
+            <h2 id="evidenceTitle">Dual-source evidence</h2>
+            <p class="help">Add fragments from each side, or import your evidence.</p>
+          </div>
+          <div class="right">
+            <span class="badge" id="countBadge">0 segments</span>
+            <button class="btn small danger" id="clearBtn" type="button">Clear all</button>
+          </div>
+        </div>
+        <div class="forms">
+          <form class="form-card w" id="wearerForm">
+            <span class="source-tag">WEARER SIDE</span>
+            <h3>Recognized keywords</h3>
+            <div class="form-grid">
+              <div class="field full">
+                <label for="wearerTokens">Keywords and digit cues</label>
+                <input id="wearerTokens" maxlength="4000" placeholder="Enter recognized keywords in order" aria-describedby="wearerHelp" autocomplete="off">
+              </div>
+              <div class="field">
+                <label for="wearerStart">Start time (s)</label>
+                <input id="wearerStart" type="number" min="0" max="86400" step="0.1" required>
+              </div>
+              <div class="field">
+                <label for="wearerEnd">End time (s)</label>
+                <input id="wearerEnd" type="number" min="0" max="86400" step="0.1" required>
+              </div>
+            </div>
+            <p class="help" id="wearerHelp">Enter recognized keywords in their original order.</p>
+            <label class="check"><input id="wearerEmpty" type="checkbox"> No recognized keyword</label>
+            <div class="form-footer">
+              <button class="btn primary" id="wearerSave" type="submit">Add wearer segment</button>
+              <button class="btn" id="wearerCancel" type="button" hidden>Cancel edit</button>
+            </div>
+          </form>
+
+          <form class="form-card l" id="remoteForm">
+            <span class="source-tag">LOUDSPEAKER SIDE</span>
+            <h3>Reconstructed speech</h3>
+            <div class="form-grid">
+              <div class="field full">
+                <label for="remoteText">Reconstructed fragment</label>
+                <textarea id="remoteText" maxlength="4000" placeholder="Enter reconstructed speech" aria-describedby="remoteHelp" required></textarea>
+              </div>
+              <div class="field">
+                <label for="remoteStart">Start time (s)</label>
+                <input id="remoteStart" type="number" min="0" max="86400" step="0.1" required>
+              </div>
+              <div class="field">
+                <label for="remoteEnd">End time (s)</label>
+                <input id="remoteEnd" type="number" min="0" max="86400" step="0.1" required>
+              </div>
+              <div class="field">
+                <label for="remoteSpeaker">Remote speaker</label>
+                <input id="remoteSpeaker" maxlength="80" placeholder="Speaker label" autocomplete="off">
+              </div>
+              <div class="field">
+                <label for="remoteQuality">Fragment quality</label>
+                <select id="remoteQuality">
+                  <option value="distorted">Distorted</option>
+                  <option value="clean">Clear</option>
+                  <option value="inaudible">Inaudible</option>
+                </select>
+              </div>
+            </div>
+            <p class="help" id="remoteHelp">Keep unclear words marked in the fragment.</p>
+            <div class="form-footer">
+              <button class="btn primary" id="remoteSave" type="submit">Add loudspeaker segment</button>
+              <button class="btn" id="remoteCancel" type="button" hidden>Cancel edit</button>
+            </div>
+          </form>
+        </div>
+        <p class="status" id="entryStatus" role="status" aria-live="polite" aria-atomic="true"></p>
+      </section>
+
+      <section class="panel" id="assembly" aria-labelledby="assemblyTitle">
+        <div class="panel-head">
+          <div class="panel-title">
+            <h2 id="assemblyTitle">Timeline and evidence</h2>
+            <p class="help">Drag a segment to adjust its time, or select it to edit.</p>
+          </div>
+          <div class="right">
+            <button class="btn primary" id="assembleBtn" type="button">Assemble by time</button>
+          </div>
+        </div>
+        <div class="timeline-wrap" role="group" aria-label="Evidence timeline in seconds">
+          <div id="timelineLanes"></div>
+          <div class="axis" id="axis"></div>
+        </div>
+        <div class="assembly">
+          <div class="log" id="evidenceLog">
+            <div class="empty">Your evidence will appear here.</div>
+          </div>
+          <details class="data-details">
+            <summary>View assembled evidence JSON</summary>
+            <pre class="json-box" id="jsonView">Assemble your evidence to see the structured data.</pre>
+          </details>
+        </div>
+      </section>
+
+      <section class="panel" id="analysis" aria-labelledby="analysisTitle">
+        <div class="panel-head">
+          <div class="panel-title">
+            <h2 id="analysisTitle">Connect the evidence</h2>
+            <p class="help">Explore the conversation context and its supporting clues.</p>
+          </div>
+          <div class="right"><span class="badge" id="analysisMode">Not analyzed</span></div>
+        </div>
+        <div class="analysis-controls">
+          <button class="btn primary" id="localRun" type="button">Run rule analysis</button>
+          <button class="btn" id="modelRun" type="button" hidden>Run model analysis</button>
+          <button class="btn secondary" id="exportResult" type="button" disabled>Export result</button>
+          <span class="mode-note" id="analysisStatus" role="status" aria-live="polite" aria-atomic="true">This online demonstration uses local rules and links each supported claim to its evidence.</span>
+        </div>
+        <details class="settings" id="modelSettings" hidden>
+          <summary>Model connection <span class="badge" id="serverStatus">Checking connection</span></summary>
+          <div class="settings-grid">
+            <div class="field">
+              <label for="apiBase">OpenAI-compatible API URL</label>
+              <input id="apiBase" type="url" maxlength="4000" placeholder="Enter your API URL" autocomplete="off" spellcheck="false">
+            </div>
+            <div class="field">
+              <label for="apiModel">Model name</label>
+              <input id="apiModel" maxlength="200" placeholder="model-name" autocomplete="off" spellcheck="false">
+            </div>
+            <div class="field">
+              <label for="apiKey">API key</label>
+              <input id="apiKey" type="password" maxlength="2000" autocomplete="off" placeholder="Used for this request only" spellcheck="false">
+            </div>
+          </div>
+          <p class="help privacy-note">Only model analysis sends the assembled evidence to your configured API.</p>
+        </details>
+        <div class="result">
+          <div class="result-card">
+            <h3>Conversation link</h3>
+            <div class="meaning" id="meaning">Awaiting analysis</div>
+            <div class="chain" id="chain">Evidence is connected by source and time.</div>
+          </div>
+          <div class="result-card" id="profile">
+            <h3>Privacy profile</h3>
+            <div class="profile-grid" id="profileGrid">
+              <div class="empty result-empty">Run an analysis to see the profile and its evidence.</div>
+            </div>
+          </div>
+        </div>
+        <details class="raw-result">
+          <summary>View structured result</summary>
+          <pre id="rawResult">No analysis result yet.</pre>
+        </details>
+      <p class="help model-help">Model mode is available when running the local Python service. See the <a href="README.md">setup guide</a>.</p></section>
+    </main>
+    <footer class="footer-note">Vib²Eve / Painting U · Every inference starts with evidence.</footer>
+    <noscript><p class="status error">Enable JavaScript to add evidence and run an analysis.</p></noscript>
+  </div>
+</body>
+</html>
