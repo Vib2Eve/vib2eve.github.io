@@ -1,0 +1,44 @@
+Painting U: Reconstruction and Privacy Profile Inference
+
+[Task]
+1. Reconstruct a plausible dialogue from both streams.
+   Complete only information supported by the recovered evidence.
+2. Infer the wearer's profile along four attributes:
+   identity, scene, age group, and financial sensitivity.
+
+[Reasoning Rules]
+- Evidence attribution:
+  Attribute each cue to its source before drawing conclusions.
+  Self-reported roles normally describe the person who states them.
+  Unattributable fragments remain unassigned.
+
+- Identity:
+  Prefer explicit identity cues. When such cues are incomplete,
+  infer identity only from corroborating evidence concerning the wearer;
+  otherwise return "unknown".
+
+- Scene:
+  Infer the underlying interaction or business scenario from contextual
+  evidence rather than individual keywords.
+
+- Age group:
+  When no explicit age cue is available, infer only a coarse age range
+  from supported role and contextual evidence.
+
+- Financial sensitivity:
+  Consider both the financial evidence itself and the contextual
+  significance of numerical amounts.
+
+[Output Constraint]
+Return one valid JSON object with no additional text:
+{
+  "dialogue": "...",
+  "identity":
+    {"label": "", "confidence": 0.0, "evidence": []},
+  "scene":
+    {"label": "", "confidence": 0.0, "evidence": []},
+  "age_group":
+    {"label": "", "confidence": 0.0, "evidence": []},
+  "financial_sensitivity":
+    {"label": "", "confidence": 0.0, "evidence": []}
+}

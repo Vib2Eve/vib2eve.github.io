@@ -1,0 +1,57 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="description" content="Painting U prompt construction: attribution, attribute-specific reasoning, and an English prompt template."><title>Painting U · Prompt Construction</title><link rel="icon" href="favicon.svg"><link rel="stylesheet" href="site.css"><style>.document{max-width:920px;padding-block:55px 70px}.document h1{font:400 39px/1.4 var(--serif);margin-bottom:24px}.document h2{font-size:27px;border-top:1px solid var(--line);padding-top:30px;margin-top:35px}.document p{font-size:14px;line-height:1.9}.document table{font-size:13px}.document th{font-size:12px}.document pre{padding:25px;background:var(--ink);color:#e3e9f1;font:12px/1.85 ui-monospace,SFMono-Regular,Menlo,monospace;overflow:auto;white-space:pre-wrap;overflow-wrap:anywhere}.document p code{font-size:12px;background:var(--wash);padding:2px 4px}.document a{overflow-wrap:anywhere}@media(max-width:680px){.document{padding-top:35px}.document h1{font-size:30px}.document h2{font-size:25px}.document p{font-size:13px}.document pre{padding:18px;font-size:11px}}</style></head><body><a class="skip-link" href="#main">Skip to content</a><header class="masthead"><div class="nav-wrap"><a class="wordmark" href="index.html">Vib<sup>2</sup>Eve<span class="wordmark-dot"></span></a><nav aria-label="Main navigation"><a href="index.html">Project overview</a><a href="index.html#method">Method</a><a href="painting-u/index.html?example=verification">Painting U ↗</a></nav><div class="nav-end"><a class="language" href="prompt-zh.html">中文</a></div></div></header><main class="container document" id="main"><h1>The Painting U Prompt</h1>
+<p><a href="prompt-zh.html">简体中文</a> · <a href="index.html#prompt">Demo overview</a> · <a href="painting-u/">Painting U Studio</a> · <a href="painting-u-representative-prompt.txt">Representative prompt as plain text</a></p>
+<p>Painting U instantiates its prompt according to the privacy attributes considered in a particular inference scenario. It does not use a single fixed prompt for every scenario. The representative instance below covers four dimensions used in the paper&#x27;s evaluation: <strong>identity</strong>, <strong>scene</strong>, <strong>age group</strong>, and <strong>financial sensitivity</strong>.</p>
+<p>Prompt construction starts with evidence attribution. Each recovered cue is assigned to its source before cues are combined or interpreted. A self-reported role normally describes the person who states it; fragments that cannot be attributed remain unassigned. Attribute-specific reasoning rules then guide inference:</p>
+<div class="table-wrap"><table><thead><tr><th scope="col">Dimension</th><th scope="col">Reasoning guidance</th></tr></thead><tbody><tr><td>Identity</td><td>Prefer explicit identity cues. Use corroborating evidence concerning the wearer when explicit cues are incomplete, and return “unknown” when evidence is insufficient.</td></tr><tr><td>Scene</td><td>Use contextual evidence to infer the underlying interaction or business scenario. An individual keyword alone does not establish the scene.</td></tr><tr><td>Age group</td><td>Without an explicit age cue, infer only a coarse age range supported by role and contextual evidence.</td></tr><tr><td>Financial sensitivity</td><td>Consider the financial evidence, the magnitude of numerical amounts, and what those amounts mean in context.</td></tr></tbody></table></div>
+<p>For security considerations, this release provides the prompt construction principles and a representative instance for academic reference. It does not release the complete Painting U privacy inference framework, including the full set of scenario-specific templates, inference rules, and prompt orchestration strategies.</p>
+<h2>Prompt Construction</h2>
+<p>This project provides the construction principles and an English prompt template for Painting U. The <a href="painting-u-representative-prompt.txt">plain-text version</a> contains the same template.</p>
+<pre tabindex="0"><code>Painting U: Reconstruction and Privacy Profile Inference
+
+[Task]
+1. Reconstruct a plausible dialogue from both streams.
+   Complete only information supported by the recovered evidence.
+2. Infer the wearer&#x27;s profile along four attributes:
+   identity, scene, age group, and financial sensitivity.
+
+[Reasoning Rules]
+- Evidence attribution:
+  Attribute each cue to its source before drawing conclusions.
+  Self-reported roles normally describe the person who states them.
+  Unattributable fragments remain unassigned.
+
+- Identity:
+  Prefer explicit identity cues. When such cues are incomplete,
+  infer identity only from corroborating evidence concerning the wearer;
+  otherwise return &quot;unknown&quot;.
+
+- Scene:
+  Infer the underlying interaction or business scenario from contextual
+  evidence rather than individual keywords.
+
+- Age group:
+  When no explicit age cue is available, infer only a coarse age range
+  from supported role and contextual evidence.
+
+- Financial sensitivity:
+  Consider both the financial evidence itself and the contextual
+  significance of numerical amounts.
+
+[Output Constraint]
+Return one valid JSON object with no additional text:
+{
+  &quot;dialogue&quot;: &quot;...&quot;,
+  &quot;identity&quot;:
+    {&quot;label&quot;: &quot;&quot;, &quot;confidence&quot;: 0.0, &quot;evidence&quot;: []},
+  &quot;scene&quot;:
+    {&quot;label&quot;: &quot;&quot;, &quot;confidence&quot;: 0.0, &quot;evidence&quot;: []},
+  &quot;age_group&quot;:
+    {&quot;label&quot;: &quot;&quot;, &quot;confidence&quot;: 0.0, &quot;evidence&quot;: []},
+  &quot;financial_sensitivity&quot;:
+    {&quot;label&quot;: &quot;&quot;, &quot;confidence&quot;: 0.0, &quot;evidence&quot;: []}
+}</code></pre>
+<h2>Output format and the Naive baseline</h2>
+<p>The JSON schema standardizes model output for automatic parsing and evaluation. It is an output-format constraint, rather than part of the reasoning mechanism itself. In the paper&#x27;s evaluation, the <strong>Naive</strong> baseline receives the same recovered evidence and uses the same output schema. It does not receive Painting U&#x27;s evidence-attribution rules, attribute-specific reasoning guidance, or other inference constraints. This controls for output formatting when evaluating the contribution of prompt construction.</p>
+<h2>Relationship to the interactive demonstration</h2>
+<p>The representative research instance above and the <a href="painting-u/">interactive studio</a> use different output schemas. The studio&#x27;s <a href="painting-u/server.py">local server</a> executes a separate demonstration prompt in model mode. Its result contains <code>dialogue</code>, <code>links</code>, and a nested <code>profile</code> object. The profile includes <code>remote_role</code> as well as the four privacy dimensions, and each field contains <code>label</code> and <code>evidence</code> without a <code>confidence</code> field. The representative instance instead places the four attributes at the top level and includes <code>confidence</code>.</p>
+<p>The studio&#x27;s browser-only rule analysis uses deterministic demonstration logic and does not execute this representative prompt or an LLM. The studio accepts text evidence; it does not run a complete pipeline from raw IMU measurements to a privacy profile. These materials document the representative research prompt without changing the studio&#x27;s existing inference behavior.</p></main><footer class="container footer"><span>Vib²Eve · Painting U</span><a href="index.html">Project homepage ↑</a></footer></body></html>

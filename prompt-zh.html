@@ -1,0 +1,57 @@
+<!doctype html><html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="description" content="Painting U prompt construction: attribution, attribute-specific reasoning, and an English prompt template."><title>Painting U · Prompt 构建</title><link rel="icon" href="favicon.svg"><link rel="stylesheet" href="site.css"><style>.document{max-width:920px;padding-block:55px 70px}.document h1{font:400 39px/1.4 var(--serif);margin-bottom:24px}.document h2{font-size:27px;border-top:1px solid var(--line);padding-top:30px;margin-top:35px}.document p{font-size:14px;line-height:1.9}.document table{font-size:13px}.document th{font-size:12px}.document pre{padding:25px;background:var(--ink);color:#e3e9f1;font:12px/1.85 ui-monospace,SFMono-Regular,Menlo,monospace;overflow:auto;white-space:pre-wrap;overflow-wrap:anywhere}.document p code{font-size:12px;background:var(--wash);padding:2px 4px}.document a{overflow-wrap:anywhere}@media(max-width:680px){.document{padding-top:35px}.document h1{font-size:30px}.document h2{font-size:25px}.document p{font-size:13px}.document pre{padding:18px;font-size:11px}}</style></head><body><a class="skip-link" href="#main">跳转到正文</a><header class="masthead"><div class="nav-wrap"><a class="wordmark" href="zh.html">Vib<sup>2</sup>Eve<span class="wordmark-dot"></span></a><nav aria-label="主导航"><a href="zh.html">项目主页</a><a href="zh.html#method">研究方法</a><a href="painting-u/zh.html?example=verification">Painting U ↗</a></nav><div class="nav-end"><a class="language" href="prompt.html">EN</a></div></div></header><main class="container document" id="main"><h1>Painting U 提示词的构建</h1>
+<p><a href="prompt.html">English</a> · <a href="zh.html#prompt">演示总览</a> · <a href="painting-u/zh.html">Painting U 交互演示</a> · <a href="painting-u-representative-prompt.txt">代表性提示词纯文本</a></p>
+<p>Painting U 根据具体推理场景所关注的隐私属性构建提示词，并非所有场景共用一个固定提示词。下方代表性实例围绕论文评估中的四个维度展开：<strong>身份</strong>（identity）、<strong>场景</strong>（scene）、<strong>年龄段</strong>（age group）和<strong>金融敏感度</strong>（financial sensitivity）。</p>
+<p>提示词首先约束证据归属：在组合与解释恢复出的线索之前，先确定每条线索来自谁。自述角色通常属于说出该角色的人；无法确定归属的片段保持未分配状态。在此基础上，各隐私维度采用相应的推理规则：</p>
+<div class="table-wrap"><table><thead><tr><th scope="col">维度</th><th scope="col">推理规则</th></tr></thead><tbody><tr><td>身份</td><td>优先采用明确的身份线索。线索不完整时，仅依据与佩戴者有关且相互印证的证据推断；证据不足时返回“unknown”。</td></tr><tr><td>场景</td><td>根据上下文判断实际交互或业务场景，避免凭单个关键词确定场景。</td></tr><tr><td>年龄段</td><td>缺少明确年龄线索时，仅根据有依据的角色与上下文推断粗粒度年龄范围。</td></tr><tr><td>金融敏感度</td><td>同时考虑财务证据本身、数值金额的大小，以及这些金额在具体上下文中的意义。</td></tr></tbody></table></div>
+<p>出于安全考虑，本次公开内容限于提示词构建原则与供学术参考的代表性实例，不发布完整的 Painting U 隐私推理框架，包括全部场景模板、推理规则和提示词编排策略。</p>
+<h2>Prompt 构建</h2>
+<p>本项目提供 Painting U 的 Prompt 构建说明与英文模板。<a href="painting-u-representative-prompt.txt">纯文本版本</a>包含相同的模板内容。</p>
+<pre tabindex="0"><code>Painting U: Reconstruction and Privacy Profile Inference
+
+[Task]
+1. Reconstruct a plausible dialogue from both streams.
+   Complete only information supported by the recovered evidence.
+2. Infer the wearer&#x27;s profile along four attributes:
+   identity, scene, age group, and financial sensitivity.
+
+[Reasoning Rules]
+- Evidence attribution:
+  Attribute each cue to its source before drawing conclusions.
+  Self-reported roles normally describe the person who states them.
+  Unattributable fragments remain unassigned.
+
+- Identity:
+  Prefer explicit identity cues. When such cues are incomplete,
+  infer identity only from corroborating evidence concerning the wearer;
+  otherwise return &quot;unknown&quot;.
+
+- Scene:
+  Infer the underlying interaction or business scenario from contextual
+  evidence rather than individual keywords.
+
+- Age group:
+  When no explicit age cue is available, infer only a coarse age range
+  from supported role and contextual evidence.
+
+- Financial sensitivity:
+  Consider both the financial evidence itself and the contextual
+  significance of numerical amounts.
+
+[Output Constraint]
+Return one valid JSON object with no additional text:
+{
+  &quot;dialogue&quot;: &quot;...&quot;,
+  &quot;identity&quot;:
+    {&quot;label&quot;: &quot;&quot;, &quot;confidence&quot;: 0.0, &quot;evidence&quot;: []},
+  &quot;scene&quot;:
+    {&quot;label&quot;: &quot;&quot;, &quot;confidence&quot;: 0.0, &quot;evidence&quot;: []},
+  &quot;age_group&quot;:
+    {&quot;label&quot;: &quot;&quot;, &quot;confidence&quot;: 0.0, &quot;evidence&quot;: []},
+  &quot;financial_sensitivity&quot;:
+    {&quot;label&quot;: &quot;&quot;, &quot;confidence&quot;: 0.0, &quot;evidence&quot;: []}
+}</code></pre>
+<h2>输出格式与 Naive 基线</h2>
+<p>JSON schema 用于统一模型输出，便于自动解析和评估；它属于输出格式约束，本身不构成推理机制。论文评估中的 <strong>Naive</strong> 基线接收相同的恢复证据，并遵循相同的输出 schema，但不接收 Painting U 的证据归属规则、各属性的推理指导或其他推理约束。这一设计控制了输出格式的影响，使评估关注提示词构建本身的贡献。</p>
+<h2>与交互演示的关系</h2>
+<p>上述研究代表实例与<a href="painting-u/zh.html">交互演示</a>使用不同的输出 schema。交互演示的<a href="painting-u/server.py">本地服务</a>在模型模式下执行独立的演示提示词，返回 <code>dialogue</code>、<code>links</code> 和嵌套的 <code>profile</code> 对象。<code>profile</code> 除四个隐私维度外还包含 <code>remote_role</code>，各字段包含 <code>label</code> 与 <code>evidence</code>，不含 <code>confidence</code>。上述代表实例则将四个属性置于顶层，并包含 <code>confidence</code> 字段。</p>
+<p>网页中的本地规则分析使用浏览器内的确定性演示逻辑，不执行上述代表性提示词，也不调用 LLM。交互演示接收文本证据，尚未实现从原始 IMU 数据到隐私画像的完整流水线。这些文档用于说明研究代表性提示词，不改变现有交互演示的推理行为。</p></main><footer class="container footer"><span>Vib²Eve · Painting U</span><a href="zh.html">返回项目主页 ↑</a></footer></body></html>
