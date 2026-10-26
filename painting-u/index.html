@@ -9,7 +9,8 @@
   <link rel="icon" href="../favicon.svg" type="image/svg+xml">
   <link rel="stylesheet" href="assets/style.css">
   <script src="assets/engine.js" defer></script>
-  <script src="assets/app.js" defer></script>
+  <script src="assets/model.js?v=20261026-api" defer></script>
+  <script src="assets/app.js?v=20261026-api" defer></script>
 </head>
 <body>
   <div class="shell"><div class="project-bar"><a href="../index.html">Vib<sup>2</sup>Eve</a><span>/ Painting U</span><a class="project-note" href="../index.html#prompt">Prompt & methodology ↗</a></div>
@@ -151,16 +152,16 @@
         </div>
         <div class="analysis-controls">
           <button class="btn primary" id="localRun" type="button">Run rule analysis</button>
-          <button class="btn" id="modelRun" type="button" hidden>Run model analysis</button>
+          <button class="btn" id="modelRun" type="button">Run model analysis</button>
           <button class="btn secondary" id="exportResult" type="button" disabled>Export result</button>
           <span class="mode-note" id="analysisStatus" role="status" aria-live="polite" aria-atomic="true">This online demonstration uses local rules and links each supported claim to its evidence.</span>
         </div>
-        <details class="settings" id="modelSettings" hidden>
-          <summary>Model connection <span class="badge" id="serverStatus">Checking connection</span></summary>
+        <details class="settings" id="modelSettings" open>
+          <summary>Model API configuration <span class="badge" id="serverStatus">Browser connection</span></summary>
           <div class="settings-grid">
             <div class="field">
               <label for="apiBase">OpenAI-compatible API URL</label>
-              <input id="apiBase" type="url" maxlength="4000" placeholder="Enter your API URL" autocomplete="off" spellcheck="false">
+              <input id="apiBase" type="url" maxlength="4000" placeholder="https://api.example.com/v1" autocomplete="off" spellcheck="false">
             </div>
             <div class="field">
               <label for="apiModel">Model name</label>
@@ -168,10 +169,16 @@
             </div>
             <div class="field">
               <label for="apiKey">API key</label>
-              <input id="apiKey" type="password" maxlength="2000" autocomplete="off" placeholder="Used for this request only" spellcheck="false">
+              <input id="apiKey" type="password" maxlength="2000" autocomplete="off" placeholder="Kept in this page only" spellcheck="false">
             </div>
           </div>
-          <p class="help privacy-note">Only model analysis sends the assembled evidence to your configured API.</p>
+          <p class="help">Use an OpenAI-compatible Chat Completions API. Enter a base URL ending in <code>/v1</code> or the full <code>/chat/completions</code> URL.</p>
+          <p class="help privacy-note" id="apiDestination" aria-live="polite">Model analysis sends the evidence and key to your configured endpoint.</p>
+          <p class="help">The key stays in this page. It is not written to browser storage or included in exports.</p>
+          <div class="right model-help">
+            <button class="btn small" id="toggleApiKey" type="button" aria-pressed="false" aria-controls="apiKey">Show key</button>
+            <button class="btn small secondary" id="clearApiKey" type="button">Clear key</button>
+          </div>
         </details>
         <div class="result">
           <div class="result-card">
@@ -190,7 +197,7 @@
           <summary>View structured result</summary>
           <pre id="rawResult">No analysis result yet.</pre>
         </details>
-      <p class="help model-help">Model mode is available when running the local Python service. See the <a href="README.md">setup guide</a>.</p></section>
+      <p class="help model-help">Online model analysis requires an API that allows browser requests (CORS). If your provider blocks them, use the local workspace and proxy described in the <a href="README.md">setup guide</a>.</p></section>
     </main>
     <footer class="footer-note">Vib²Eve / Painting U · Every inference starts with evidence.</footer>
     <noscript><p class="status error">Enable JavaScript to add evidence and run an analysis.</p></noscript>

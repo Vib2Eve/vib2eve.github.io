@@ -9,7 +9,8 @@
   <link rel="icon" href="../favicon.svg" type="image/svg+xml">
   <link rel="stylesheet" href="assets/style.css">
   <script src="assets/engine.js" defer></script>
-  <script src="assets/app.js" defer></script>
+  <script src="assets/model.js?v=20261026-api" defer></script>
+  <script src="assets/app.js?v=20261026-api" defer></script>
 </head>
 <body>
   <div class="shell"><div class="project-bar"><a href="../zh.html">Vib<sup>2</sup>Eve</a><span>/ Painting U</span><a class="project-note" href="../zh.html#prompt">Prompt 与方法说明 ↗</a></div>
@@ -151,27 +152,33 @@
         </div>
         <div class="analysis-controls">
           <button class="btn primary" id="localRun" type="button">运行规则分析</button>
-          <button class="btn" id="modelRun" type="button" hidden>运行模型分析</button>
+          <button class="btn" id="modelRun" type="button">运行模型分析</button>
           <button class="btn secondary" id="exportResult" type="button" disabled>导出结果</button>
           <span class="mode-note" id="analysisStatus" role="status" aria-live="polite" aria-atomic="true">本地分析使用规则；模型分析调用您配置的 API。</span>
         </div>
-        <details class="settings" id="modelSettings" hidden>
-          <summary>模型连接 <span class="badge" id="serverStatus">正在检查连接</span></summary>
+        <details class="settings" id="modelSettings" open>
+          <summary>模型 API 配置 <span class="badge" id="serverStatus">浏览器直连</span></summary>
           <div class="settings-grid">
             <div class="field">
               <label for="apiBase">兼容 OpenAI 的 API 地址</label>
-              <input id="apiBase" type="url" maxlength="4000" placeholder="填写您的 API 地址" autocomplete="off" spellcheck="false">
+              <input id="apiBase" type="url" maxlength="4000" placeholder="https://api.example.com/v1" autocomplete="off" spellcheck="false">
             </div>
             <div class="field">
               <label for="apiModel">模型名称</label>
-              <input id="apiModel" maxlength="200" placeholder="输入模型名称" autocomplete="off" spellcheck="false">
+              <input id="apiModel" maxlength="200" placeholder="服务商提供的模型 ID" autocomplete="off" spellcheck="false">
             </div>
             <div class="field">
               <label for="apiKey">API 密钥</label>
-              <input id="apiKey" type="password" maxlength="2000" autocomplete="off" placeholder="仅用于本次请求" spellcheck="false">
+              <input id="apiKey" type="password" maxlength="2000" autocomplete="off" placeholder="仅保留在当前页面" spellcheck="false">
             </div>
           </div>
-          <p class="help privacy-note">只有模型分析会将拼接后的证据发送至您配置的 API。</p>
+          <p class="help">支持兼容 OpenAI 的 Chat Completions 接口。可填写以 <code>/v1</code> 结尾的基础地址或完整 <code>/chat/completions</code> 地址。</p>
+          <p class="help privacy-note" id="apiDestination" aria-live="polite">模型分析时，证据和密钥发送至您填写的接口。</p>
+          <p class="help">密钥只保留在当前页面，不写入本地存储，也不包含在导出文件中。</p>
+          <div class="right model-help">
+            <button class="btn small" id="toggleApiKey" type="button" aria-pressed="false" aria-controls="apiKey">显示密钥</button>
+            <button class="btn small secondary" id="clearApiKey" type="button">清除密钥</button>
+          </div>
         </details>
         <div class="result">
           <div class="result-card">
@@ -190,7 +197,7 @@
           <summary>查看结构化结果</summary>
           <pre id="rawResult">尚无分析结果。</pre>
         </details>
-      <p class="help model-help">运行本地 Python 服务后可以使用模型模式。详见 <a href="README.md">配置说明</a>.</p></section>
+      <p class="help model-help">在线直连需要接口允许浏览器跨域（CORS）请求。若接口不支持，请按 <a href="README.md">配置说明</a> 启动本地代理，并在本地工作台运行模型分析。</p></section>
     </main>
     <footer class="footer-note">Vib²Eve / Painting U · 每项推理，都从证据出发。</footer>
     <noscript><p class="status error">请启用 JavaScript，以添加证据并运行分析。</p></noscript>

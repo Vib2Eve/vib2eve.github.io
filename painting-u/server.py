@@ -252,7 +252,7 @@ class Handler(BaseHTTPRequestHandler):
             "painting-u-representative-prompt.txt",
             "painting-u/index.html", "painting-u/zh.html", "painting-u/README.md",
             "painting-u/assets/app.js", "painting-u/assets/engine.js",
-            "painting-u/assets/style.css",
+            "painting-u/assets/style.css", "painting-u/assets/model.js",
         }
         mime = {".html": "text/html", ".js": "text/javascript", ".css": "text/css",
                 ".svg": "image/svg+xml", ".md": "text/plain", ".txt": "text/plain"}
