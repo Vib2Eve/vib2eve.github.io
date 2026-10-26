@@ -18,3 +18,11 @@ if (copyButton) {
     }
   });
 }
+
+const projectVideo = document.querySelector('.project-film video');
+if (projectVideo) {
+  const showVideoError = () => { document.getElementById('videoError').hidden = false; };
+  projectVideo.addEventListener('error', showVideoError);
+  projectVideo.querySelector('source').addEventListener('error', showVideoError);
+  projectVideo.addEventListener('loadeddata', () => { document.getElementById('videoError').hidden = true; });
+}
