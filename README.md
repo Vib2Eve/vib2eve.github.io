@@ -8,4 +8,4 @@ Academic project overview, Painting U evidence workspace, and prompt constructio
 
 This repository contains only website resources. The research repository remains private.
 
-The hosted workspace provides an illustrative browser rule demonstration. Model API analysis uses the optional local Python proxy and a user-configured compatible API.
+The hosted workspace offers rule analysis and a visible model API configuration panel. Enter your own compatible API URL, model name, and key to run model analysis directly in the browser; the API must allow cross-origin requests (CORS). The optional local Python proxy supports providers that block browser requests. See the [connection guide](painting-u/README.md). Credentials are kept in page memory and excluded from exports.
