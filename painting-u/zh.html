@@ -10,7 +10,7 @@
   <link rel="stylesheet" href="assets/style.css">
   <script src="assets/engine.js" defer></script>
   <script src="assets/model.js?v=20261026-api" defer></script>
-  <script src="assets/app.js?v=20261026-api" defer></script>
+  <script src="assets/app.js?v=20261026-rule-demo" defer></script>
 </head>
 <body>
   <div class="shell"><div class="project-bar"><a href="../zh.html">Vib<sup>2</sup>Eve</a><span>/ Painting U</span><a class="project-note" href="../zh.html#prompt">Prompt 与方法说明 ↗</a></div>
@@ -151,11 +151,12 @@
           <div class="right"><span class="badge" id="analysisMode">尚未分析</span></div>
         </div>
         <div class="analysis-controls">
-          <button class="btn primary" id="localRun" type="button">运行规则分析</button>
+          <button class="btn primary" id="localRun" type="button" aria-describedby="ruleDemoNote">运行规则演示</button>
           <button class="btn" id="modelRun" type="button">运行模型分析</button>
           <button class="btn secondary" id="exportResult" type="button" disabled>导出结果</button>
-          <span class="mode-note" id="analysisStatus" role="status" aria-live="polite" aria-atomic="true">本地分析使用规则；模型分析调用您配置的 API。</span>
+          <span class="mode-note" id="analysisStatus" role="status" aria-live="polite" aria-atomic="true">规则演示无需 API；模型分析调用您配置的 API。</span>
         </div>
+        <p class="help" id="ruleDemoNote">“运行规则演示”采用预设规则，不调用大模型，仅用于展示操作流程。</p>
         <details class="settings" id="modelSettings" open>
           <summary>模型 API 配置 <span class="badge" id="serverStatus">浏览器直连</span></summary>
           <div class="settings-grid">

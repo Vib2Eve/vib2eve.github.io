@@ -24,7 +24,7 @@ The proxy binds to `127.0.0.1`, accepts same-origin requests, and refuses API re
 
 ## Demonstration scope
 
-The workspace accepts recovered text evidence. **Run rule analysis** uses deterministic browser logic and requires no API. **Run model analysis** sends the evidence to your model with the workspace's demonstration prompt. Both modes return the same workspace schema: `dialogue`, `links`, and a `profile` containing `remote_role`, `identity`, `scene`, `age_group`, and `financial_sensitivity`. Labels cite input segment IDs; unsupported fields remain undetermined. Valid references establish provenance, not correctness.
+The workspace accepts recovered text evidence. **Run rule demo** uses preset browser rules without calling a language model. It illustrates the workspace flow and requires no API. **Run model analysis** sends the evidence to your model with the workspace's demonstration prompt. Both modes return the same workspace schema: `dialogue`, `links`, and a `profile` containing `remote_role`, `identity`, `scene`, `age_group`, and `financial_sensitivity`. Labels cite input segment IDs; unsupported fields remain undetermined. Valid references establish provenance, not correctness.
 
 The staged account-verification example illustrates source attribution. It is not research data or an experimental result. The workspace does not execute the complete pipeline from raw IMU measurements to a privacy profile. The demonstration prompt remains separate from the representative research prompt in the project documentation.
 
@@ -50,6 +50,6 @@ This public directory contains the bilingual workspace, its assets, this guide, 
 
 ## 演示范围
 
-工作台接收恢复后的文本证据。“运行规则分析”采用确定性浏览器规则，无需 API；“运行模型分析”使用独立的工作台演示 Prompt 调用您配置的模型。两种模式均输出 `dialogue`、`links` 和包含五个字段的 `profile`，并检查引用的片段 ID。缺少有效证据引用的属性返回“无法确定”；有效引用仅说明证据出处，不保证判断正确。
+工作台接收恢复后的文本证据。“运行规则演示”仅用预设浏览器规则展示操作流程，不调用大模型，无需 API；“运行模型分析”使用独立的工作台演示 Prompt 调用您配置的模型。两种模式均输出 `dialogue`、`links` 和包含五个字段的 `profile`，并检查引用的片段 ID。缺少有效证据引用的属性返回“无法确定”；有效引用仅说明证据出处，不保证判断正确。
 
 账户验证示例用于说明证据归属，不属于研究数据或实验结果。网页不执行从原始 IMU 信号到隐私画像的完整流程。演示 Prompt 与项目文档中的代表性研究 Prompt 保持独立。本公开目录不包含论文源码、研究数据、训练权重或 API 密钥。
