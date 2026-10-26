@@ -65,7 +65,54 @@ function confirmReplace(){return !segments.length||confirm(text('Replace the cur
 $('clearBtn').onclick=()=>{if(segments.length&&!confirm(text('Clear the evidence and results?','清空当前证据与结果？')))return;invalidate();segments=[];cancelEdit();renderAll();say(text('Ready for new evidence.','可以添加新的证据。'))};
 function showResult(output,mode){result={...output,mode,language:lang};$('meaning').textContent=output.dialogue||text('No conversation link established','尚未建立对话关联');$('chain').innerHTML=(Array.isArray(output.links)?output.links:[]).map(link=>`<div>${esc(link)}</div>`).join('');const fields=[['remote_role',text('Remote role','远端角色')],['identity',text('Wearer identity','佩戴者身份')],['scene',text('Conversation context','对话情境')],['age_group',text('Age group','年龄段')],['financial_sensitivity',text('Financial sensitivity','金融敏感度')]];$('profileGrid').innerHTML=fields.map(([name,label])=>{const field=output.profile?.[name]||{},refs=Array.isArray(field.evidence)?field.evidence.filter(id=>segments.some(s=>s.id===id)):[];return `<div class="attr"><label>${label}</label><strong>${esc(field.label||text('Undetermined','未确定'))}</strong>${refs.length?`<div class="why">${refs.map(id=>`<button class="ref" data-ref="${esc(id)}" title="${text('View evidence','查看证据')}">${esc(id)}</button>`).join('')}</div>`:''}</div>`}).join('');$('profileGrid').querySelectorAll('[data-ref]').forEach(button=>button.onclick=()=>{const ev=[...$('evidenceLog').children].find(el=>el.dataset.evidence===button.dataset.ref);if(ev){ev.scrollIntoView({behavior:'smooth',block:'center'});ev.classList.add('highlight');setTimeout(()=>ev.classList.remove('highlight'),2000)}});$('rawResult').textContent=JSON.stringify(result,null,2);$('analysisMode').textContent=mode==='model'?text('Model analysis','模型分析'):text('Local rule analysis','本地规则分析');$('exportResult').disabled=false;setStep(4)}
 $('localRun').onclick=()=>{if(!assembled.length&&!assemble())return;if(controller){controller.abort();controller=null}showResult(analyzeLocally(assembled,lang),'local');$('analysisStatus').textContent=text('Rule analysis complete. Each supported field links to its evidence.','本地规则分析完成；有依据的字段可点击回溯证据。')};
-$('modelRun').onclick=async()=>{if(!assembled.length&&!assemble())return;if(!backend){$('modelSettings').open=true;$('analysisStatus').textContent=text('Start server.py, then open http://127.0.0.1:8765 to use model analysis.','请运行 server.py，再打开 http://127.0.0.1:8765 使用模型分析。');return}const endpoint=$('apiBase').value.trim(),model=$('apiModel').value.trim(),key=$('apiKey').value.trim();if(!endpoint||!model||!key){$('modelSettings').open=true;$('analysisStatus').textContent=text('Enter the API URL, model name, and key.','请填写 API 地址、模型名称和密钥。');return}const version=revision,requestController=new AbortController();controller=requestController;const button=$('modelRun');button.disabled=true;button.classList.add('busy');setStep(3);$('analysisStatus').textContent=text('Connecting the evidence with your model…','模型正在分析证据…');const timer=setTimeout(()=>requestController.abort('timeout'),70000);try{const response=await fetch('/api/infer',{method:'POST',headers:{'Content-Type':'application/json'},signal:requestController.signal,body:JSON.stringify({endpoint,model,key,language:lang,segments:clone(assembled)})});const data=await response.json();if(!response.ok)throw Error(data.error||text('Model request failed','模型请求失败'));if(version!==revision||controller!==requestController)return;if(!data.result||typeof data.result!=='object')throw Error(text('Invalid model response','模型响应格式不正确'));showResult(data.result,'model');$('analysisStatus').textContent=text('Model analysis complete. Review the linked evidence for each inference.','模型分析完成，请结合引用证据核对各项推断。')}catch(e){if(version!==revision||controller!==requestController)return;setStep(result?4:2);$('analysisStatus').textContent=requestController.signal.aborted?text('Request timed out. Check the model endpoint and try again.','请求超时，请检查模型服务后重试。'):text('Model request failed: ','模型请求失败：')+errorMessage(e)}finally{clearTimeout(timer);if(controller===requestController)controller=null;button.disabled=false;button.classList.remove('busy')}};
+function modelConnection() {
+  $('serverStatus').textContent = backend ? text('Local proxy ready', '本地代理已就绪') : text('Browser connection', '浏览器直连');
+  let destination = '';
+  try { destination = new URL(globalThis.PaintingUModel.completionURL($('apiBase').value, lang)).origin; } catch (_) {}
+  $('apiDestination').textContent = destination
+    ? text('Model analysis sends this evidence and your API key to ', '模型分析将把当前证据和 API 密钥发送至 ') + destination + (backend ? text(' through your local proxy.', '，经本地代理转发。') : text(' directly from your browser.', '，由浏览器直接请求。'))
+    : text('Enter your provider endpoint. Model analysis sends the evidence and key only to that endpoint.', '填写您使用的服务商接口；模型分析时，证据和密钥只发送至该接口。');
+}
+$('toggleApiKey').onclick=()=>{const visible=$('apiKey').type==='password';$('apiKey').type=visible?'text':'password';$('toggleApiKey').setAttribute('aria-pressed',String(visible));$('toggleApiKey').textContent=visible?text('Hide key','隐藏密钥'):text('Show key','显示密钥')};
+$('clearApiKey').onclick=()=>{$('apiKey').value='';$('apiKey').type='password';$('toggleApiKey').setAttribute('aria-pressed','false');$('toggleApiKey').textContent=text('Show key','显示密钥');$('apiKey').dispatchEvent(new Event('input'));$('analysisStatus').textContent=text('API key cleared from this page.','本页 API 密钥已清除。')};
+for(const id of ['apiBase','apiModel','apiKey']) $(id).addEventListener('input',()=>{
+  if(controller){revision++;controller.abort();controller=null;$('analysisStatus').textContent=text('API configuration changed. Run model analysis again.','API 配置已更改，请重新运行模型分析。')}
+  modelConnection();
+});
+window.addEventListener('pagehide',()=>{$('apiKey').value='';if(controller){controller.abort();controller=null}});
+$('modelRun').onclick=async()=>{
+  $('modelSettings').open=true;
+  const endpoint=$('apiBase').value.trim(),model=$('apiModel').value.trim(),key=$('apiKey').value.trim();
+  for(const [id,value] of [['apiBase',endpoint],['apiModel',model],['apiKey',key]]) {
+    if(!value){$('analysisStatus').textContent=text('Enter the API URL, model name, and key.','请填写 API 地址、模型名称和密钥。');$(id).focus();return}
+  }
+  try { globalThis.PaintingUModel.completionURL(endpoint,lang); } catch(error) {$('analysisStatus').textContent=error.message;$('apiBase').focus();return}
+  if(!assembled.length&&!assemble())return;
+  modelConnection();
+  const version=revision,requestController=new AbortController();controller=requestController;
+  const button=$('modelRun');button.disabled=true;button.classList.add('busy');setStep(3);
+  $('analysisStatus').textContent=text('Your model is analyzing the evidence…','模型正在分析证据…');
+  const timer=setTimeout(()=>requestController.abort('timeout'),70000);
+  try {
+    let output;
+    if(backend){
+      const response=await fetch('/api/infer',{method:'POST',headers:{'Content-Type':'application/json'},redirect:'error',cache:'no-store',signal:requestController.signal,body:JSON.stringify({endpoint,model,key,language:lang,segments:clone(assembled)})});
+      const data=await response.json();
+      if(!response.ok)throw Error(data.error||text('Model request failed','模型请求失败'));
+      output=globalThis.PaintingUModel.normalizeResult(data.result,assembled,lang);
+    } else {
+      output=await globalThis.PaintingUModel.requestModel({endpoint,model,key,language:lang,segments:clone(assembled),signal:requestController.signal});
+    }
+    if(version!==revision||controller!==requestController)return;
+    showResult(output,'model');$('analysisStatus').textContent=text('Model analysis complete. Review the linked evidence for each inference.','模型分析完成，请结合引用证据核对各项推断。');
+  } catch(error) {
+    if(version!==revision||controller!==requestController)return;
+    setStep(result?4:2);
+    $('analysisStatus').textContent=requestController.signal.aborted?text('Request timed out. Check the model service and try again.','请求超时，请检查模型服务后重试。'):text('Model request failed: ','模型请求失败：')+error.message;
+  } finally {
+    clearTimeout(timer);if(controller===requestController)controller=null;button.disabled=false;button.classList.remove('busy');
+  }
+};
 function download(data,name){const url=URL.createObjectURL(new Blob([JSON.stringify(data,null,2)],{type:'application/json;charset=utf-8'})),a=document.createElement('a');a.href=url;a.download=name;a.click();setTimeout(()=>URL.revokeObjectURL(url),1000)}
 $('exportBtn').onclick=()=>{if(!assembled.length&&!assemble())return;download({segments:assembled},'painting-u-evidence.json');say(text('Evidence exported.','证据已导出。'))};
 $('exportResult').onclick=()=>{if(result)download(result,`painting-u-result-${lang}.json`)};
@@ -74,8 +121,13 @@ $('importBtn').onclick=()=>$('importFile').click();$('importFile').onchange=asyn
 const handoffKey='painting-u-language-handoff';document.querySelectorAll('.language-switch a').forEach(a=>a.addEventListener('click',()=>{try{sessionStorage.setItem(handoffKey,JSON.stringify({segments}))}catch(_){}}));
 try{const handoff=sessionStorage.getItem(handoffKey);sessionStorage.removeItem(handoffKey);if(handoff){const data=JSON.parse(handoff);if(data.example!==true)segments=data.segments.length?validateSegments(data.segments):[]}}catch(_){}
 resetResult();renderAll();
-$('serverStatus').textContent=text('Local rule analysis available','本地规则分析可用');
-if(['localhost','127.0.0.1','[::1]'].includes(location.hostname)){fetch('/api/status').then(r=>r.ok?r.json():null).then(data=>{backend=data?.service==='painting-u';$('modelRun').hidden=!backend;$('modelSettings').hidden=!backend;$('serverStatus').textContent=backend?text('Model server connected','模型代理已就绪'):text('Local rules · model server not connected','本地规则 · 未连接模型代理')}).catch(()=>{$('serverStatus').textContent=text('Local rules · model server not connected','本地规则 · 未连接模型代理')})}
+modelConnection();
+if(['localhost','127.0.0.1','[::1]'].includes(location.hostname)){
+  const check=new AbortController(),timer=setTimeout(()=>check.abort(),3000);
+  fetch('/api/status',{signal:check.signal,cache:'no-store'}).then(response=>response.ok?response.json():null).then(data=>{
+    backend=data?.service==='painting-u';modelConnection();
+  }).catch(()=>{}).finally(()=>clearTimeout(timer));
+}
 
 const exampleRows = [
  {id:'L01',source:'loudspeaker',start:0.7,end:3.0,speaker:'Remote speaker 1',quality:'distorted',text:text("I'm customer support. Please read the verification code.","我是客服，请读出验证码。")},
