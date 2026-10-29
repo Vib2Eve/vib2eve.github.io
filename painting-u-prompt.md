@@ -4,7 +4,7 @@
 
 Painting U instantiates its prompt according to the privacy attributes considered in a particular inference scenario. It does not use a single fixed prompt for every scenario. The representative instance below covers four dimensions used in the paper's evaluation: **identity**, **scene**, **age group**, and **financial sensitivity**.
 
-Prompt construction starts with evidence attribution. Each recovered cue is assigned to its source before cues are combined or interpreted. A self-reported role normally describes the person who states it; fragments that cannot be attributed remain unassigned. Attribute-specific reasoning rules then guide inference:
+Prompt construction starts with evidence attribution. Each recovered cue is assigned to its source before cues are combined or interpreted. Make reliable connections between pieces of evidence where appropriate, but do not speculate. Fragments that cannot be attributed remain unassigned. Attribute-specific reasoning rules then guide inference:
 
 | Dimension | Reasoning guidance |
 | --- | --- |
@@ -31,7 +31,8 @@ Painting U: Reconstruction and Privacy Profile Inference
 [Reasoning Rules]
 - Evidence attribution:
   Attribute each cue to its source before drawing conclusions.
-  Self-reported roles normally describe the person who states them.
+  Make reliable connections between pieces of evidence where appropriate,
+  but do not speculate.
   Unattributable fragments remain unassigned.
 
 - Identity:
