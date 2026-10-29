@@ -1,7 +1,7 @@
 <!doctype html><html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="description" content="Painting U prompt construction: attribution, attribute-specific reasoning, and an English prompt template."><title>Painting U · Prompt 构建</title><link rel="icon" href="favicon.svg"><link rel="stylesheet" href="site.css"><style>.document{max-width:920px;padding-block:55px 70px}.document h1{font:400 39px/1.4 var(--serif);margin-bottom:24px}.document h2{font-size:27px;border-top:1px solid var(--line);padding-top:30px;margin-top:35px}.document p{font-size:14px;line-height:1.9}.document table{font-size:13px}.document th{font-size:12px}.document pre{padding:25px;background:var(--ink);color:#e3e9f1;font:12px/1.85 ui-monospace,SFMono-Regular,Menlo,monospace;overflow:auto;white-space:pre-wrap;overflow-wrap:anywhere}.document p code{font-size:12px;background:var(--wash);padding:2px 4px}.document a{overflow-wrap:anywhere}@media(max-width:680px){.document{padding-top:35px}.document h1{font-size:30px}.document h2{font-size:25px}.document p{font-size:13px}.document pre{padding:18px;font-size:11px}}</style></head><body><a class="skip-link" href="#main">跳转到正文</a><header class="masthead"><div class="nav-wrap"><a class="wordmark" href="zh.html">Vib<sup>2</sup>Eve<span class="wordmark-dot"></span></a><nav aria-label="主导航"><a href="zh.html">项目主页</a><a href="zh.html#method">研究方法</a><a href="painting-u/zh.html?example=verification">Painting U ↗</a></nav><div class="nav-end"><a class="language" href="prompt.html">EN</a></div></div></header><main class="container document" id="main"><h1>Painting U 提示词的构建</h1>
 <p><a href="prompt.html">English</a> · <a href="zh.html#prompt">演示总览</a> · <a href="painting-u/zh.html">Painting U 交互演示</a> · <a href="painting-u-representative-prompt.txt">代表性提示词纯文本</a></p>
 <p>Painting U 根据具体推理场景所关注的隐私属性构建提示词，并非所有场景共用一个固定提示词。下方代表性实例围绕论文评估中的四个维度展开：<strong>身份</strong>（identity）、<strong>场景</strong>（scene）、<strong>年龄段</strong>（age group）和<strong>金融敏感度</strong>（financial sensitivity）。</p>
-<p>提示词首先约束证据归属：在组合与解释恢复出的线索之前，先确定每条线索来自谁。自述角色通常属于说出该角色的人；无法确定归属的片段保持未分配状态。在此基础上，各隐私维度采用相应的推理规则：</p>
+<p>提示词首先约束证据归属：在组合与解释恢复出的线索之前，先确定每条线索来自谁。可以进行适当的证据间的可靠联系，但不要猜测。无法确定归属的片段保持未分配状态。在此基础上，各隐私维度采用相应的推理规则：</p>
 <div class="table-wrap"><table><thead><tr><th scope="col">维度</th><th scope="col">推理规则</th></tr></thead><tbody><tr><td>身份</td><td>优先采用明确的身份线索。线索不完整时，仅依据与佩戴者有关且相互印证的证据推断；证据不足时返回“unknown”。</td></tr><tr><td>场景</td><td>根据上下文判断实际交互或业务场景，避免凭单个关键词确定场景。</td></tr><tr><td>年龄段</td><td>缺少明确年龄线索时，仅根据有依据的角色与上下文推断粗粒度年龄范围。</td></tr><tr><td>金融敏感度</td><td>同时考虑财务证据本身、数值金额的大小，以及这些金额在具体上下文中的意义。</td></tr></tbody></table></div>
 <p>出于安全考虑，本次公开内容限于提示词构建原则与供学术参考的代表性实例，不发布完整的 Painting U 隐私推理框架，包括全部场景模板、推理规则和提示词编排策略。</p>
 <h2>Prompt 构建</h2>
@@ -17,7 +17,8 @@
 [Reasoning Rules]
 - Evidence attribution:
   Attribute each cue to its source before drawing conclusions.
-  Self-reported roles normally describe the person who states them.
+  Make reliable connections between pieces of evidence where appropriate,
+  but do not speculate.
   Unattributable fragments remain unassigned.
 
 - Identity:
