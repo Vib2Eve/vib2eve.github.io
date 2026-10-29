@@ -9,7 +9,8 @@ Painting U: Reconstruction and Privacy Profile Inference
 [Reasoning Rules]
 - Evidence attribution:
   Attribute each cue to its source before drawing conclusions.
-  Self-reported roles normally describe the person who states them.
+  Make reliable connections between pieces of evidence where appropriate,
+  but do not speculate.
   Unattributable fragments remain unassigned.
 
 - Identity:
