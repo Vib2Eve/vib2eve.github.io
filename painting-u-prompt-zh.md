@@ -4,7 +4,7 @@
 
 Painting U 根据具体推理场景所关注的隐私属性构建提示词，并非所有场景共用一个固定提示词。下方代表性实例围绕论文评估中的四个维度展开：**身份**（identity）、**场景**（scene）、**年龄段**（age group）和**金融敏感度**（financial sensitivity）。
 
-提示词首先约束证据归属：在组合与解释恢复出的线索之前，先确定每条线索来自谁。自述角色通常属于说出该角色的人；无法确定归属的片段保持未分配状态。在此基础上，各隐私维度采用相应的推理规则：
+提示词首先约束证据归属：在组合与解释恢复出的线索之前，先确定每条线索来自谁。可以进行适当的证据间的可靠联系，但不要猜测。无法确定归属的片段保持未分配状态。在此基础上，各隐私维度采用相应的推理规则：
 
 | 维度 | 推理规则 |
 | --- | --- |
@@ -31,7 +31,8 @@ Painting U: Reconstruction and Privacy Profile Inference
 [Reasoning Rules]
 - Evidence attribution:
   Attribute each cue to its source before drawing conclusions.
-  Self-reported roles normally describe the person who states them.
+  Make reliable connections between pieces of evidence where appropriate,
+  but do not speculate.
   Unattributable fragments remain unassigned.
 
 - Identity:
