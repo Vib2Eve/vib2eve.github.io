@@ -141,6 +141,16 @@ function loadExample(){
  say(text('Illustrative example loaded. Run the rule demo to inspect the supporting evidence.','说明性示例已加载。运行规则演示，查看各项结果的支持证据。'));
 }
 $('loadExample').addEventListener('click',loadExample);
-if(new URLSearchParams(location.search).get('example')==='verification'&&!segments.length)loadExample();
+const entryParams=new URLSearchParams(location.search),caseId=entryParams.get('case');
+function loadDialogueCase(id){
+ if(!confirmReplace())return;
+ try{
+  const rows=globalThis.PaintingUCaseLibrary.evidence(id,lang),safe=validateSegments(rows);
+  invalidate();segments=safe;cancelEdit();renderAll();assemble();
+  say(text('Dialogue case loaded. Wearer evidence contains only the marked fragments; times illustrate turn order.','对话案例已载入。佩戴者端仅含原高亮片段；时间仅用于演示发言顺序。'));
+ }catch(error){say(text('Could not load this dialogue case. Open the case library and try again.','该对话案例无法加载，请从案例页重新打开。'),true)}
+}
+if(caseId&&!segments.length)loadDialogueCase(caseId);
+else if(entryParams.get('example')==='verification'&&!segments.length)loadExample();
 
 })();
