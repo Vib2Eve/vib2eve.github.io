@@ -139,37 +139,37 @@ const exampleRows = [
   {
     id: 'L01', source: 'loudspeaker', start: 0.7, end: 7.2, speaker: 'S1', quality: 'distorted',
     text: text(
-      'This is the bank counter. You retired late last year, and both of your pension payments have arrived. Shall we proceed with that term deposit [unclear]?',
-      '这里是银行柜台。您去年底办了退休，两笔养老金都已到账。那笔定期存款[听不清]，还按刚才说的办吗？'
+      'Your [unclear] at the counter [unclear] retirement late last year [unclear] the term deposit [unclear].',
+      '［听不清］柜台［听不清］去年底退休［听不清］那笔［听不清］定期［听不清］。'
     ),
   },
-  { id: 'W02', source: 'wearer', start: 7.6, end: 9.5, keywords: zh ? ['定期', '按刚才说的办'] : ['term deposit', 'as discussed'] },
+  { id: 'W02', source: 'wearer', start: 7.6, end: 9.5, keywords: ['5'] },
   {
     id: 'L03', source: 'loudspeaker', start: 10.0, end: 14.9, speaker: 'S1', quality: 'distorted',
     text: text(
-      'Your balance is a little over 80,000 after the pension payments. Would you like to keep some of it available for daily expenses [unclear]?',
-      '两笔养老金到账后，您的账户余额是八万多。要不要留一部分做日常开销[听不清]？'
+      'The account [unclear] after the two pension payments [unclear]. Do you want to leave [unclear] accessible [unclear]?',
+      '账户［听不清］两笔养老金到账后［听不清］你要留［听不清］活期［听不清］？'
     ),
   },
-  { id: 'W04', source: 'wearer', start: 15.4, end: 18.6, keywords: zh ? ['一万', '活期', '其余转定期'] : ['ten thousand', 'available', 'rest into the term deposit'] },
+  { id: 'W04', source: 'wearer', start: 15.4, end: 18.6, keywords: [text('10,000', '一万')] },
 ];
 
 const exampleResult = {
   dialogue: text(
-    'A bank representative confirms the wearer’s pension payments. The wearer keeps part of the balance available and puts the rest into a term deposit.',
-    '银行柜台人员确认佩戴者的养老金已到账。佩戴者决定留一部分活期，其余转入定期。'
+    'The exchange likely concerns a term deposit after pension payments arrived. The wearer may want to keep 10,000 available.',
+    '这段交流可能是在讨论养老金到账后的定期存款安排。佩戴者可能希望留一万作活期。'
   ),
   links: [
-    text('L01 is from the loudspeaker. The speaker introduces the bank counter and addresses the wearer about their retirement and pension.', 'L01 来自扬声器端。说话人表明自己在银行柜台，并向佩戴者确认其退休和养老金到账情况。'),
-    text('W02 and W04 are wearer fragments. They respond to the proposal in L01 and the question about available funds in L03.', 'W02 和 W04 属于佩戴者，分别回应 L01 的定期存款提议和 L03 关于保留活期资金的问题。'),
-    text('Retirement and pension receipts suggest a possible later life stage. The balance and deposit allocation are financial details of the wearer’s account.', '退休与领取养老金提供大致人生阶段的线索。余额和存款分配属于佩戴者账户的金融信息。'),
+    text('L01 and L03 link a counter, a term deposit, and pension payments. Together they suggest that the loudspeaker is a bank representative speaking to a retired customer.', 'L01 和 L03 合起来提供了柜台、定期存款和养老金到账的线索。扬声器端可能是银行柜台人员，佩戴者可能是办理业务的退休客户。'),
+    text('W04 contains only “10,000”. Its position after L03 suggests the wearer is stating how much to keep available. The isolated digit in W02 remains unresolved.', 'W04 只保留了“一万”。它出现在 L03 关于活期的提问之后，可能是佩戴者希望保留的金额。W02 的孤立数字用途未定。'),
+    text('Retirement and pension receipts suggest a possible later life stage. The pension and deposit plans concern the wearer’s finances.', '退休和养老金到账为判断佩戴者的大致人生阶段提供线索。养老金与存款安排属于佩戴者的金融信息。'),
   ],
   profile: {
-    remote_role: { label: text('Bank counter representative', '银行柜台人员'), evidence: ['L01'] },
-    identity: { label: text('Retiree receiving a pension', '领取养老金的退休人员'), evidence: ['L01', 'L03'] },
-    scene: { label: text('Pension receipts and a term deposit', '养老金到账与定期配置'), evidence: ['L01', 'W02', 'L03', 'W04'] },
-    age_group: { label: text('Possibly an older adult (low confidence)', '可能为年长成年人（低置信度）'), evidence: ['L01'] },
-    financial_sensitivity: { label: text('High · balance and deposit allocation', '高 · 账户余额与存款分配'), evidence: ['L03', 'W04'] },
+    remote_role: { label: text('Likely a bank counter representative', '可能是银行柜台人员'), evidence: ['L01', 'L03'] },
+    identity: { label: text('Likely a retiree receiving a pension', '可能是领取养老金的退休人员'), evidence: ['L01', 'L03'] },
+    scene: { label: text('Pension receipts and a term deposit', '养老金到账与定期配置'), evidence: ['L01', 'L03', 'W04'] },
+    age_group: { label: text('Possibly an older adult (low confidence)', '可能为年长成年人（低置信度）'), evidence: ['L01', 'L03'] },
+    financial_sensitivity: { label: text('High · pension and deposit plans', '高 · 养老金与存款安排'), evidence: ['L01', 'L03', 'W04'] },
   },
 };
 
