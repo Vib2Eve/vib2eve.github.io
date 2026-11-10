@@ -44,12 +44,19 @@ a complete sensor-to-profile pipeline or a trained local model was run.
 Review the supplied fragments for additional privacy exposure categories beyond
 the profile. Consider authentication, account and personal identifiers, balances,
 pension or income, deposits and payments, contacts, locations or routines, health,
-relationships, and other sensitive information. Check context across segments
-for relevant exposure cues, with source attribution. Use "supported" for categories
-with clear evidence and "possible" for partial or ambiguous evidence. Cite only
-actual segment IDs and omit entries with no supporting cues. List categories only
-in privacy_exposure. Keep credentials, full private identifiers, and authentication
-digits out of every report field. Leave masked or unsupported amounts unresolved.
+relationships, and other sensitive information. Actively form hypotheses by
+connecting cues across the wearer and loudspeaker streams and across turns.
+Compare plausible interpretations using source, timing, and conversational
+context. Include the strongest evidence-backed hypotheses even if no single
+fragment states them explicitly. Mark clear conclusions "supported" and plausible
+but unresolved conclusions "possible". Cite the segment IDs that jointly support
+each conclusion and omit conclusions with no evidence. Record the findings
+in privacy_information. Keep credentials, full private identifiers, and authentication
+digits out of every report field. If the evidence establishes a complete
+verification cue, identify its category as supported and cite the relevant
+fragment. In the dialogue summary, state clearly supported non-credential
+numbers directly when their units and context are established. Qualify only
+uncertain matches and leave masked or unsupported amounts unresolved.
 The category values are authentication, account_identifier, account_balance,
 pension_income, deposit_activity, financial_activity, personal_identity,
 contact_information, location_and_routine, health_information,
@@ -59,7 +66,7 @@ Return a single JSON object with exactly these English keys:
 {
   "dialogue": "short description of linked evidence; never a fabricated transcript",
   "links": ["brief evidence link 1", "brief evidence link 2"],
-  "privacy_exposure": [{"category":"account_balance", "status":"possible", "evidence":[]}],
+  "privacy_information": [{"category":"account_balance", "status":"possible", "evidence":[]}],
   "profile": {
     "remote_role": {"label":"", "evidence":[]},
     "identity": {"label":"", "evidence":[]},
@@ -189,7 +196,9 @@ def normalize_result(result: dict, segments: list[dict], language: str = "en") -
             label, refs = unknown, []
         profile[name] = {"label": label, "evidence": refs}
     exposures = {}
-    items = result.get("privacy_exposure")
+    items = result.get("privacy_information")
+    if not isinstance(items, list):
+        items = result.get("privacy_exposure")
     if isinstance(items, list):
         for item in items:
             if not isinstance(item, dict):
@@ -206,10 +215,12 @@ def normalize_result(result: dict, segments: list[dict], language: str = "en") -
                 exposures[category] = {"category": category, "status": status, "evidence": evidence}
             elif previous["status"] == status:
                 previous["evidence"] = list(dict.fromkeys(previous["evidence"] + evidence))
+    privacy_information = list(exposures.values())
     return {
         "dialogue": result["dialogue"].strip()[:1000] or message(language, "No conversation link established.", "尚未建立对话关联。"),
         "links": [item[:250] for item in result["links"] if isinstance(item, str)][:8],
-        "privacy_exposure": list(exposures.values()),
+        "privacy_information": privacy_information,
+        "privacy_exposure": privacy_information,
         "profile": profile,
     }
 
