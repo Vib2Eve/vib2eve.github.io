@@ -1,6 +1,6 @@
 (() => {
 'use strict';
-const {validateSegments, analyzeLocally}=globalThis.PaintingUEngine;
+const {validateSegments, analyzeLocally, exposureLabels, normalizeExposure}=globalThis.PaintingUEngine;
 const $=id=>document.getElementById(id);
 const zh=document.documentElement.lang.startsWith('zh'), lang=zh?'zh':'en';
 const text=(en,cn)=>zh?cn:en;
@@ -10,7 +10,7 @@ let segments=[],assembled=[],editId=null,nextId=1,revision=0,result=null,control
 const sorted=()=>segments.slice().sort((a,b)=>a.start-b.start||a.end-b.end);
 function say(message,error=false){$('entryStatus').textContent=message;$('entryStatus').classList.toggle('error',error)}
 function setStep(n){for(let i=1;i<=4;i++){const el=$('step'+i);el.classList.toggle('on',i<=n);el.setAttribute('aria-current',i===n?'step':'false')}}
-function resetResult(){result=null;$('meaning').textContent=text('Awaiting analysis','等待分析');$('chain').textContent=text('Assemble the evidence, then connect the clues.','整理时间线，再连接其中的线索。');$('profileGrid').innerHTML=`<div class="empty result-empty">${text('Your evidence-based profile will appear here.','有依据的推理结果将在这里呈现。')}</div>`;$('rawResult').textContent=text('Not run','尚未运行');$('analysisMode').textContent=text('Not run','尚未运行');$('exportResult').disabled=true;setStep(1)}
+function resetResult(){result=null;$('meaning').textContent=text('Awaiting analysis','等待分析');$('chain').textContent=text('Assemble the evidence, then connect the clues.','整理时间线，再连接其中的线索。');$('profileGrid').innerHTML=`<div class="empty result-empty">${text('Your evidence-based profile will appear here.','有依据的推理结果将在这里呈现。')}</div>`;if($('exposureGrid'))$('exposureGrid').textContent=text('Run analysis to review privacy exposures.','运行分析后查看隐私暴露信息。');$('rawResult').textContent=text('Not run','尚未运行');$('analysisMode').textContent=text('Not run','尚未运行');$('exportResult').disabled=true;setStep(1)}
 function invalidate(){revision++;assembled=[];if(controller){controller.abort();controller=null;$('analysisStatus').textContent=text('Evidence changed. Run analysis again.','证据已更新，请重新分析。')}else $('analysisStatus').textContent=text('Choose the rule demo, or configure an API for model analysis.','可运行规则演示，或配置 API 后进行模型分析。');resetResult()}
 function tokenList(value){return value.split(/[\s,;，；、]+/).map(s=>s.trim()).filter(Boolean)}
 function nextIdentity(source){let id;do{id=(source==='wearer'?'W':'L')+String(nextId++).padStart(2,'0')}while(segments.some(x=>x.id===id));return id}
@@ -68,7 +68,60 @@ const analysisModeLabels = {
   local: text('Rule demo result', '规则演示结果'),
   example: text('Illustrative judgments', '示例判断'),
 };
-function showResult(output,mode){result={...output,mode,language:lang};$('meaning').textContent=output.dialogue||text('No conversation link established','尚未建立对话关联');$('chain').innerHTML=(Array.isArray(output.links)?output.links:[]).map(link=>`<div>${esc(link)}</div>`).join('');const fields=[['remote_role',text('Remote role','远端角色')],['identity',text('Wearer identity','佩戴者身份')],['scene',text('Conversation context','对话情境')],['age_group',text('Age group','年龄段')],['financial_sensitivity',text('Financial sensitivity','金融敏感度')]];$('profileGrid').innerHTML=fields.map(([name,label])=>{const field=output.profile?.[name]||{},refs=Array.isArray(field.evidence)?field.evidence.filter(id=>segments.some(s=>s.id===id)):[];return `<div class="attr"><label>${label}</label><strong>${esc(field.label||text('Undetermined','未确定'))}</strong>${refs.length?`<div class="why">${refs.map(id=>`<button class="ref" data-ref="${esc(id)}" title="${text('View evidence','查看证据')}">${esc(id)}</button>`).join('')}</div>`:''}</div>`}).join('');$('profileGrid').querySelectorAll('[data-ref]').forEach(button=>button.onclick=()=>{const ev=[...$('evidenceLog').children].find(el=>el.dataset.evidence===button.dataset.ref);if(ev){ev.scrollIntoView({behavior:'smooth',block:'center'});ev.classList.add('highlight');setTimeout(()=>ev.classList.remove('highlight'),2000)}});$('rawResult').textContent=JSON.stringify(result,null,2);$('analysisMode').textContent=analysisModeLabels[mode];$('exportResult').disabled=false;setStep(4)}
+function evidenceButtons(refs) {
+  if (!refs.length) return '';
+  const title = text('View evidence', '查看证据');
+  return `<div class="why">${refs.map(id => `<button class="ref" data-ref="${esc(id)}" title="${title}">${esc(id)}</button>`).join('')}</div>`;
+}
+
+function bindEvidenceButtons(container) {
+  container.querySelectorAll('[data-ref]').forEach(button => {
+    button.onclick = () => {
+      const evidence = [...$('evidenceLog').children].find(el => el.dataset.evidence === button.dataset.ref);
+      if (!evidence) return;
+      evidence.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      evidence.classList.add('highlight');
+      setTimeout(() => evidence.classList.remove('highlight'), 2000);
+    };
+  });
+}
+
+function showResult(output, mode) {
+  const privacyExposure = normalizeExposure?.(output.privacy_exposure, segments) ?? [];
+  result = { ...output, privacy_exposure: privacyExposure, mode, language: lang };
+  $('meaning').textContent = output.dialogue || text('No conversation link established', '尚未建立对话关联');
+  $('chain').innerHTML = (Array.isArray(output.links) ? output.links : []).map(link => `<div>${esc(link)}</div>`).join('');
+  const fields = [
+    ['remote_role', text('Remote role', '远端角色')],
+    ['identity', text('Wearer identity', '佩戴者身份')],
+    ['scene', text('Conversation context', '对话情境')],
+    ['age_group', text('Age group', '年龄段')],
+    ['financial_sensitivity', text('Financial sensitivity', '金融敏感度')],
+  ];
+  const profileGrid = $('profileGrid');
+  profileGrid.innerHTML = fields.map(([name, label]) => {
+    const field = output.profile?.[name] || {};
+    const refs = Array.isArray(field.evidence) ? field.evidence.filter(id => segments.some(s => s.id === id)) : [];
+    return `<div class="attr"><label>${label}</label><strong>${esc(field.label || text('Undetermined', '未确定'))}</strong>${evidenceButtons(refs)}</div>`;
+  }).join('');
+  const exposureGrid = $('exposureGrid');
+  if (exposureGrid && privacyExposure.length) {
+    exposureGrid.innerHTML = privacyExposure.map(item => {
+      const label = text(...exposureLabels[item.category]);
+      const status = item.status === 'supported' ? text('Evidence supported', '证据支持') : text('Possible exposure', '线索待核');
+      return `<div class="attr"><label>${status}</label><strong>${label}</strong>${evidenceButtons(item.evidence)}</div>`;
+    }).join('');
+  } else if (exposureGrid) {
+    exposureGrid.textContent = text('No exposure categories were identified from this evidence.', '当前证据中尚未识别到隐私暴露类别。');
+  }
+  bindEvidenceButtons(profileGrid);
+  if (exposureGrid) bindEvidenceButtons(exposureGrid);
+  $('rawResult').textContent = JSON.stringify(result, null, 2);
+  $('analysisMode').textContent = analysisModeLabels[mode];
+  $('exportResult').disabled = false;
+  setStep(4);
+}
+
 $('localRun').onclick = () => {
   if (!assembled.length && !assemble()) return;
   if (controller) {
@@ -185,6 +238,13 @@ const exampleResult = {
     text('L01 and L03 link a counter, a term deposit, and pension payments. Together they suggest that the loudspeaker is a bank representative speaking to a retired customer.', 'L01 和 L03 合起来提供了柜台、定期存款和养老金到账的线索。扬声器端可能是银行柜台人员，佩戴者可能是办理业务的退休客户。'),
     text('W02 contains a verification keyword and several digit cues. W04 follows the question about available funds in L03, which gives its number words a likely financial context. The amount remains undetermined.', 'W02 中的验证码关键词和数字提供了核验线索。W04 紧接 L03 关于活期的提问，数字可能与资金分配有关，具体金额待定。'),
     text('Retirement and pension receipts suggest a possible later life stage. The pension and deposit plans concern the wearer’s finances.', '退休和养老金到账为判断佩戴者的大致人生阶段提供线索。养老金与存款安排属于佩戴者的金融信息。'),
+  ],
+  privacy_exposure: [
+    { category: 'authentication', status: 'supported', evidence: ['W02'] },
+    { category: 'account_identifier', status: 'supported', evidence: ['W02'] },
+    { category: 'account_balance', status: 'possible', evidence: ['L03', 'W04'] },
+    { category: 'pension_income', status: 'supported', evidence: ['L03'] },
+    { category: 'deposit_activity', status: 'possible', evidence: ['L01', 'L03', 'W04'] },
   ],
   profile: {
     remote_role: { label: text('Likely a bank counter representative', '可能是银行柜台人员'), evidence: ['L01', 'L03'] },
