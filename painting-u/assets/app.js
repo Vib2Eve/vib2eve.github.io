@@ -143,31 +143,37 @@ const exampleRows = [
       '［听不清］柜台［听不清］去年底退休［听不清］那笔［听不清］定期［听不清］。'
     ),
   },
-  { id: 'W02', source: 'wearer', start: 7.6, end: 9.5, keywords: ['5'] },
   {
-    id: 'L03', source: 'loudspeaker', start: 10.0, end: 14.9, speaker: 'S1', quality: 'distorted',
+    id: 'W02', source: 'wearer', start: 7.6, end: 22.5,
+    keywords: zh
+      ? ['验证码', '7', '3', '9', '6', '5', '0', '尾号', '5', '4', '0', '尾号', '1', '1', '8']
+      : ['five', 'verification', 'seven', 'three', 'nine', 'six', 'five', 'zero', 'four', 'zero', 'one', 'one', 'eight'],
+  },
+  {
+    id: 'L03', source: 'loudspeaker', start: 23.0, end: 27.9, speaker: 'S1', quality: 'distorted',
     text: text(
       'The account [unclear] after the two pension payments [unclear]. Do you want to leave [unclear] accessible [unclear]?',
       '账户［听不清］两笔养老金到账后［听不清］你要留［听不清］活期［听不清］？'
     ),
   },
-  { id: 'W04', source: 'wearer', start: 15.4, end: 18.6, keywords: [text('10,000', '一万')] },
+  // Keep the digit words in the utterance. English amounts are read as quantities.
+  { id: 'W04', source: 'wearer', start: 28.4, end: 33.6, keywords: zh ? ['1', '7', '2'] : ['two'] },
 ];
 
 const exampleResult = {
   dialogue: text(
-    'The exchange likely concerns a term deposit after pension payments arrived. The wearer may want to keep 10,000 available.',
-    '这段交流可能是在讨论养老金到账后的定期存款安排。佩戴者可能希望留一万作活期。'
+    'The exchange likely concerns a term deposit after pension payments arrived. The wearer’s final number words may relate to how much to keep available.',
+    '这段交流可能是在讨论养老金到账后的定期存款安排。佩戴者最后说出的数字可能与保留活期的金额有关。'
   ),
   links: [
     text('L01 and L03 link a counter, a term deposit, and pension payments. Together they suggest that the loudspeaker is a bank representative speaking to a retired customer.', 'L01 和 L03 合起来提供了柜台、定期存款和养老金到账的线索。扬声器端可能是银行柜台人员，佩戴者可能是办理业务的退休客户。'),
-    text('W04 contains only “10,000”. Its position after L03 suggests the wearer is stating how much to keep available. The isolated digit in W02 remains unresolved.', 'W04 只保留了“一万”。它出现在 L03 关于活期的提问之后，可能是佩戴者希望保留的金额。W02 的孤立数字用途未定。'),
+    text('W02 contains a verification keyword and several digit cues. W04 follows the question about available funds in L03, which gives its number words a likely financial context. The amount remains undetermined.', 'W02 中的验证码关键词和数字提供了核验线索。W04 紧接 L03 关于活期的提问，数字可能与资金分配有关，具体金额待定。'),
     text('Retirement and pension receipts suggest a possible later life stage. The pension and deposit plans concern the wearer’s finances.', '退休和养老金到账为判断佩戴者的大致人生阶段提供线索。养老金与存款安排属于佩戴者的金融信息。'),
   ],
   profile: {
     remote_role: { label: text('Likely a bank counter representative', '可能是银行柜台人员'), evidence: ['L01', 'L03'] },
     identity: { label: text('Likely a retiree receiving a pension', '可能是领取养老金的退休人员'), evidence: ['L01', 'L03'] },
-    scene: { label: text('Pension receipts and a term deposit', '养老金到账与定期配置'), evidence: ['L01', 'L03', 'W04'] },
+    scene: { label: text('Pension receipts and a term deposit', '养老金到账与定期配置'), evidence: ['L01', 'W02', 'L03', 'W04'] },
     age_group: { label: text('Possibly an older adult (low confidence)', '可能为年长成年人（低置信度）'), evidence: ['L01', 'L03'] },
     financial_sensitivity: { label: text('High · pension and deposit plans', '高 · 养老金与存款安排'), evidence: ['L01', 'L03', 'W04'] },
   },
