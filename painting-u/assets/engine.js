@@ -64,6 +64,40 @@
   const rowText = row => row.source === 'wearer' ? row.keywords.join(' ') : row.text;
   const usable = row => row.source === 'wearer' || row.quality !== 'inaudible';
 
+  const exposureLabels = Object.freeze({
+    authentication: ['Authentication credentials', '认证凭证'],
+    account_identifier: ['Account identifiers', '账户标识'],
+    account_balance: ['Account balance or changes', '账户余额与变动'],
+    pension_income: ['Pension or income information', '养老金或收入信息'],
+    deposit_activity: ['Deposit or investment activity', '存款或投资安排'],
+    financial_activity: ['Payments or financial activity', '支付或金融活动'],
+    personal_identity: ['Personal identifiers', '个人身份标识'],
+    contact_information: ['Contact details', '联系方式'],
+    location_and_routine: ['Location or routine', '位置或日常规律'],
+    health_information: ['Health information', '健康信息'],
+    private_relationships: ['Private relationships', '私人关系'],
+    other_sensitive: ['Other sensitive information', '其他敏感信息'],
+  });
+
+  function normalizeExposure(items, segments) {
+    if (!Array.isArray(items)) return [];
+    const validIds = new Set(segments.map(row => row.id));
+    const entries = new Map();
+    for (const item of items) {
+      if (!item || typeof item.category !== 'string' || !Object.hasOwn(exposureLabels, item.category) ||
+          !['supported', 'possible'].includes(item.status) || !Array.isArray(item.evidence)) continue;
+      const evidence = [...new Set(item.evidence.filter(id => validIds.has(id)))];
+      if (!evidence.length) continue;
+      const previous = entries.get(item.category);
+      if (!previous || (previous.status === 'possible' && item.status === 'supported')) {
+        entries.set(item.category, { category: item.category, status: item.status, evidence });
+      } else if (previous.status === item.status) {
+        previous.evidence = [...new Set([...previous.evidence, ...evidence])];
+      }
+    }
+    return [...entries.values()];
+  }
+
   /* Each group stays within an uninterrupted sequence of neighboring wearer
      segments. A complete code in one segment is never joined to another code. */
   function digitGroups(rows) {
@@ -137,7 +171,7 @@
   function analyzeLocally(items, lang = 'en') {
     const t = messages[lang === 'zh' ? 'zh' : 'en'];
     const unknown = () => ({ label: t.unknown, evidence: [] });
-    const result = { mode: 'local', dialogue: t.empty, links: [], profile: {
+    const result = { mode: 'local', dialogue: t.empty, links: [], privacy_exposure: [], profile: {
       remote_role: unknown(), identity: unknown(), scene: unknown(),
       age_group: unknown(), financial_sensitivity: unknown(),
     } };
@@ -191,6 +225,13 @@
 
     const high = rows.filter(row => usable(row) && highFinancePattern.test(rowText(row)));
     const medium = rows.filter(row => usable(row) && mediumFinancePattern.test(rowText(row)));
+    const authentication = rows.filter(row => usable(row) && verificationPattern.test(rowText(row)));
+    if (authentication.length) {
+      result.privacy_exposure.push({ category: 'authentication', status: 'possible', evidence: ids(authentication) });
+    }
+    if (high.length || medium.length) {
+      result.privacy_exposure.push({ category: 'financial_activity', status: 'supported', evidence: ids([...high, ...medium]) });
+    }
     if (high.length || medium.length) {
       result.profile.financial_sensitivity = { label: high.length ? t.high : t.medium,
         evidence: ids(high.length ? high : medium) };
@@ -204,5 +245,5 @@
     return result;
   }
 
-  globalThis.PaintingUEngine = Object.freeze({ validateSegments, analyzeLocally });
+  globalThis.PaintingUEngine = Object.freeze({ validateSegments, analyzeLocally, exposureLabels, normalizeExposure });
 })();
