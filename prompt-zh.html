@@ -54,5 +54,9 @@ Return one valid JSON object with no additional text:
 <h2>输出格式与 Naive 基线</h2>
 <p>JSON schema 用于统一模型输出，便于自动解析和评估；它属于输出格式约束，本身不构成推理机制。论文评估中的 <strong>Naive</strong> 基线接收相同的恢复证据，并遵循相同的输出 schema，但不接收 Painting U 的证据归属规则、各属性的推理指导或其他推理约束。这一设计控制了输出格式的影响，使评估关注提示词构建本身的贡献。</p>
 <h2>与交互演示的关系</h2>
-<p>上述研究代表实例与<a href="painting-u/zh.html">交互演示</a>使用不同的输出 schema。交互演示的<a href="painting-u/server.py">本地服务</a>在模型模式下执行独立的演示提示词，返回 <code>dialogue</code>、<code>links</code> 和嵌套的 <code>profile</code> 对象。<code>profile</code> 除四个隐私维度外还包含 <code>remote_role</code>，各字段包含 <code>label</code> 与 <code>evidence</code>，不含 <code>confidence</code>。上述代表实例则将四个属性置于顶层，并包含 <code>confidence</code> 字段。</p>
-<p>网页中的本地规则分析使用浏览器内的确定性演示逻辑，不执行上述代表性提示词，也不调用 LLM。交互演示接收文本证据，尚未实现从原始 IMU 数据到隐私画像的完整流水线。这些文档用于说明研究代表性提示词，不改变现有交互演示的推理行为。</p></main><footer class="container footer"><span>Vib²Eve · Painting U</span><a href="zh.html">返回项目主页 ↑</a></footer></body></html>
+<p>上述研究代表实例与<a href="painting-u/zh.html">交互演示</a>使用不同的输出 schema。交互演示的<a href="painting-u/server.py">本地服务</a>在模型模式下执行独立的演示提示词，返回 <code>dialogue</code>、<code>links</code>、<code>privacy_exposure</code> 和嵌套的 <code>profile</code> 对象。<code>profile</code> 除四个隐私维度外还包含 <code>remote_role</code>，各字段包含 <code>label</code> 与 <code>evidence</code>，不含 <code>confidence</code>。上述代表实例则将四个属性置于顶层，并包含 <code>confidence</code> 字段。</p>
+<p>网页中的本地规则分析使用浏览器内的确定性演示逻辑，不执行上述代表性提示词，也不调用 LLM。交互演示接收文本证据，尚未实现从原始 IMU 数据到隐私画像的完整流水线。这些文档用于说明研究代表性提示词，不改变现有交互演示的推理行为。</p>
+<h2 id="privacy-exposure">交互演示的隐私暴露检查</h2>
+<p>工作台的模型提示词要求在画像之外主动检查更多有证据的隐私暴露类别，例如认证凭证、账户标识、余额变动、养老金、位置规律和健康信息。跨片段关联以来源、时间和上下文为依据。清楚的线索标为「证据支持」，片段残缺或归属不清时标为「线索待核」。</p>
+<p>结果中的 <code>privacy_exposure</code> 记录类别、状态和证据编号。认证凭证仅列类别。被遮蔽的金额保持待核。</p>
+</main><footer class="container footer"><span>Vib²Eve · Painting U</span><a href="zh.html">返回项目主页 ↑</a></footer></body></html>
