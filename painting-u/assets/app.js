@@ -87,7 +87,9 @@ function bindEvidenceButtons(container) {
 }
 
 function showResult(output, mode) {
-  const privacyExposure = normalizeExposure?.(output.privacy_exposure, segments) ?? [];
+  const privacyExposure = mode === 'example'
+    ? output.privacy_exposure
+    : normalizeExposure?.(output.privacy_exposure, segments) ?? [];
   result = { ...output, privacy_exposure: privacyExposure, mode, language: lang };
   $('meaning').textContent = output.dialogue || text('No conversation link established', '尚未建立对话关联');
   $('chain').innerHTML = (Array.isArray(output.links) ? output.links : []).map(link => `<div>${esc(link)}</div>`).join('');
@@ -109,7 +111,8 @@ function showResult(output, mode) {
     exposureGrid.innerHTML = privacyExposure.map(item => {
       const label = text(...exposureLabels[item.category]);
       const status = item.status === 'supported' ? text('Evidence supported', '证据支持') : text('Possible exposure', '线索待核');
-      return `<div class="attr"><label>${status}</label><strong>${label}</strong>${evidenceButtons(item.evidence)}</div>`;
+      const detail = item.detail ? `<p class="help">${esc(item.detail)}</p>` : '';
+      return `<div class="attr"><label>${status}</label><strong>${label}</strong>${detail}${evidenceButtons(item.evidence)}</div>`;
     }).join('');
   } else if (exposureGrid) {
     exposureGrid.textContent = text('No exposure categories were identified from this evidence.', '当前证据中尚未识别到隐私暴露类别。');
@@ -207,8 +210,8 @@ const exampleRows = [
   {
     id: 'L01', source: 'loudspeaker', start: 0.7, end: 7.2, speaker: 'S1', quality: 'distorted',
     text: text(
-      'Your [unclear] at the counter [unclear] retirement late last year [unclear] the term deposit [unclear].',
-      '［听不清］柜台［听不清］去年底退休［听不清］那笔［听不清］定期［听不清］。'
+      'Your [unclear] at the counter [unclear] retirement late last year [unclear]. ID ending [unclear], receiving card ending [unclear]. The term deposit at [unclear] point [unclear] percent annually [unclear].',
+      '［听不清］柜台［听不清］去年底退休［听不清］。身份证尾号［听不清］，收款卡尾号［听不清］。那笔年利率百分之［听不清］点［听不清］的定期［听不清］。'
     ),
   },
   {
@@ -240,11 +243,26 @@ const exampleResult = {
     text('Retirement and pension receipts suggest a possible later life stage. The pension and deposit plans concern the wearer’s finances.', '退休和养老金到账为判断佩戴者的大致人生阶段提供线索。养老金与存款安排属于佩戴者的金融信息。'),
   ],
   privacy_exposure: [
-    { category: 'authentication', status: 'supported', evidence: ['W02'] },
-    { category: 'account_identifier', status: 'supported', evidence: ['W02'] },
-    { category: 'account_balance', status: 'possible', evidence: ['L03', 'W04'] },
-    { category: 'pension_income', status: 'supported', evidence: ['L03'] },
-    { category: 'deposit_activity', status: 'possible', evidence: ['L01', 'L03', 'W04'] },
+    {
+      category: 'authentication', status: 'supported', evidence: ['W02'],
+      detail: text('A six-digit verification code is mentioned. Its digits are masked in this report.', '提到一组 6 位验证码，清单中遮盖具体数字。'),
+    },
+    {
+      category: 'account_identifier', status: 'supported', evidence: ['L01', 'W02'],
+      detail: text('The receiving card ends in 118. L01 identifies the card and W02 supplies its final digits.', '收款卡尾号为 118。L01 提到收款卡，W02 给出了对应的尾号。'),
+    },
+    {
+      category: 'account_balance', status: 'possible', evidence: ['L03', 'W04'],
+      detail: text('The balance likely changed after the pension payments. The before and after amounts remain undetermined.', '养老金到账后可能发生了余额变动，到账前后的余额金额待核。'),
+    },
+    {
+      category: 'pension_income', status: 'supported', evidence: ['L03'],
+      detail: text('Two pension payments arrived.', '两笔养老金已到账。'),
+    },
+    {
+      category: 'deposit_activity', status: 'possible', evidence: ['L01', 'W02'],
+      detail: text('The annual rate may be 4.0%. L01 supplies the decimal and percentage context, and W02 contains the digits 4 and 0.', '定期年利率可能为 4.0%。L01 给出了百分比和小数点的语境，W02 保留了数字 4 和 0。'),
+    },
   ],
   profile: {
     remote_role: { label: text('Likely a bank counter representative', '可能是银行柜台人员'), evidence: ['L01', 'L03'] },
