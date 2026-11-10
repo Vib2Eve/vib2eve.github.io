@@ -3,24 +3,13 @@ Painting U: Reconstruction and Privacy Profile Inference
 [Task]
 1. Reconstruct a plausible dialogue from both streams.
    Complete only information supported by the recovered evidence.
-2. Infer the wearer's profile along four attributes:
-   identity, scene, age group, and financial sensitivity.
-3. Report additional privacy findings in privacy_information.
+2. Analyze the dialogue along five dimensions: identity, scene, age group,
+   financial sensitivity, and privacy information.
 
 [Reasoning Rules]
 - Evidence attribution:
   Attribute each cue to its source before drawing conclusions.
   Leave fragments with an unclear source unassigned.
-
-- Contextual privacy inference:
-  Actively combine evidence across the wearer and loudspeaker streams and
-  across turns. Consider plausible interpretations based on speaker attribution,
-  timing, and context, including findings no single fragment states explicitly.
-  Report the best-supported conclusions and cite the contributing segment IDs.
-  Use "supported" for clear findings and "possible" for plausible findings that
-  remain unresolved. Omit findings without evidence. When context and units are
-  clear, state supported non-credential numbers directly in the dialogue summary.
-  Report authentication and private identifier exposure by category and evidence.
 
 - Identity:
   Prefer explicit identity cues. When such cues are incomplete,
@@ -39,15 +28,22 @@ Painting U: Reconstruction and Privacy Profile Inference
   Consider both the financial evidence itself and the contextual
   significance of numerical amounts.
 
-[Privacy Information Fields]
-For each item, include "category", "status", and "evidence" (segment IDs).
-Use an empty array if the evidence supports no additional findings.
+- Privacy information:
+  Actively combine evidence across the wearer and loudspeaker streams and
+  across turns. Consider plausible interpretations based on speaker attribution,
+  timing, and context, including findings no single fragment states explicitly.
+  Report the best-supported conclusions and cite the contributing segment IDs.
+  Use "supported" for clear findings and "possible" for plausible findings that
+  remain unresolved. Omit findings without evidence. When context and units are
+  clear, state supported non-credential numbers directly in the dialogue summary.
+  Report authentication and private identifier exposure by category and evidence.
+  For each item in privacy_information, include "category", "status", and
+  "evidence" (segment IDs). Use an empty array if there are no findings.
 
 [Output Constraint]
 Return one valid JSON object with no additional text:
 {
   "dialogue": "...",
-  "privacy_information": [],
   "identity":
     {"label": "", "confidence": 0.0, "evidence": []},
   "scene":
@@ -55,5 +51,6 @@ Return one valid JSON object with no additional text:
   "age_group":
     {"label": "", "confidence": 0.0, "evidence": []},
   "financial_sensitivity":
-    {"label": "", "confidence": 0.0, "evidence": []}
+    {"label": "", "confidence": 0.0, "evidence": []},
+  "privacy_information": []
 }
