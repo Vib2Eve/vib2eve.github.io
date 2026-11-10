@@ -63,7 +63,12 @@ function assemble(){if(!segments.length){say(text('Add evidence first.','请先�
 $('assembleBtn').onclick=assemble;
 function confirmReplace(){return !segments.length||confirm(text('Replace the current evidence? Export JSON first if you want to keep it.','替换当前证据？如需保留，请先导出 JSON。'))}
 $('clearBtn').onclick=()=>{if(segments.length&&!confirm(text('Clear the evidence and results?','清空当前证据与结果？')))return;invalidate();segments=[];cancelEdit();renderAll();say(text('Ready for new evidence.','可以添加新的证据。'))};
-function showResult(output,mode){result={...output,mode,language:lang};$('meaning').textContent=output.dialogue||text('No conversation link established','尚未建立对话关联');$('chain').innerHTML=(Array.isArray(output.links)?output.links:[]).map(link=>`<div>${esc(link)}</div>`).join('');const fields=[['remote_role',text('Remote role','远端角色')],['identity',text('Wearer identity','佩戴者身份')],['scene',text('Conversation context','对话情境')],['age_group',text('Age group','年龄段')],['financial_sensitivity',text('Financial sensitivity','金融敏感度')]];$('profileGrid').innerHTML=fields.map(([name,label])=>{const field=output.profile?.[name]||{},refs=Array.isArray(field.evidence)?field.evidence.filter(id=>segments.some(s=>s.id===id)):[];return `<div class="attr"><label>${label}</label><strong>${esc(field.label||text('Undetermined','未确定'))}</strong>${refs.length?`<div class="why">${refs.map(id=>`<button class="ref" data-ref="${esc(id)}" title="${text('View evidence','查看证据')}">${esc(id)}</button>`).join('')}</div>`:''}</div>`}).join('');$('profileGrid').querySelectorAll('[data-ref]').forEach(button=>button.onclick=()=>{const ev=[...$('evidenceLog').children].find(el=>el.dataset.evidence===button.dataset.ref);if(ev){ev.scrollIntoView({behavior:'smooth',block:'center'});ev.classList.add('highlight');setTimeout(()=>ev.classList.remove('highlight'),2000)}});$('rawResult').textContent=JSON.stringify(result,null,2);$('analysisMode').textContent=mode==='model'?text('Model analysis','模型分析'):text('Rule demo result','规则演示结果');$('exportResult').disabled=false;setStep(4)}
+const analysisModeLabels = {
+  model: text('Model analysis', '模型分析'),
+  local: text('Rule demo result', '规则演示结果'),
+  example: text('Illustrative judgments', '示例判断'),
+};
+function showResult(output,mode){result={...output,mode,language:lang};$('meaning').textContent=output.dialogue||text('No conversation link established','尚未建立对话关联');$('chain').innerHTML=(Array.isArray(output.links)?output.links:[]).map(link=>`<div>${esc(link)}</div>`).join('');const fields=[['remote_role',text('Remote role','远端角色')],['identity',text('Wearer identity','佩戴者身份')],['scene',text('Conversation context','对话情境')],['age_group',text('Age group','年龄段')],['financial_sensitivity',text('Financial sensitivity','金融敏感度')]];$('profileGrid').innerHTML=fields.map(([name,label])=>{const field=output.profile?.[name]||{},refs=Array.isArray(field.evidence)?field.evidence.filter(id=>segments.some(s=>s.id===id)):[];return `<div class="attr"><label>${label}</label><strong>${esc(field.label||text('Undetermined','未确定'))}</strong>${refs.length?`<div class="why">${refs.map(id=>`<button class="ref" data-ref="${esc(id)}" title="${text('View evidence','查看证据')}">${esc(id)}</button>`).join('')}</div>`:''}</div>`}).join('');$('profileGrid').querySelectorAll('[data-ref]').forEach(button=>button.onclick=()=>{const ev=[...$('evidenceLog').children].find(el=>el.dataset.evidence===button.dataset.ref);if(ev){ev.scrollIntoView({behavior:'smooth',block:'center'});ev.classList.add('highlight');setTimeout(()=>ev.classList.remove('highlight'),2000)}});$('rawResult').textContent=JSON.stringify(result,null,2);$('analysisMode').textContent=analysisModeLabels[mode];$('exportResult').disabled=false;setStep(4)}
 $('localRun').onclick=()=>{if(!assembled.length&&!assemble())return;if(controller){controller.abort();controller=null}showResult(analyzeLocally(assembled,lang),'local');$('analysisStatus').textContent=text('Rule demo complete. Preset rules were used; no language model was called. Inspect each result’s evidence.','规则演示已完成：采用预设规则，未调用大模型。可点击引用查看证据。')};
 function modelConnection() {
   $('serverStatus').textContent = backend ? text('Local proxy ready', '本地代理已就绪') : text('Browser connection', '浏览器直连');
@@ -129,16 +134,51 @@ if(['localhost','127.0.0.1','[::1]'].includes(location.hostname)){
   }).catch(()=>{}).finally(()=>clearTimeout(timer));
 }
 
+// Authored walkthrough adapted from training dialogue 08.
 const exampleRows = [
- {id:'L01',source:'loudspeaker',start:0.7,end:3.0,speaker:'Remote speaker 1',quality:'distorted',text:text("I'm customer support. Please read the verification code.","我是客服，请读出验证码。")},
- {id:'W02',source:'wearer',start:3.5,end:7.6,keywords:[text('verification','验证码'),'6','0','6','9','8','2']},
- {id:'L03',source:'loudspeaker',start:8.2,end:11.7,speaker:'Remote speaker 1',quality:'distorted',text:text("Thank you. I'll handle [unclear].","谢谢，我来处理[模糊]。")},
- {id:'W04',source:'wearer',start:12.4,end:16.7,keywords:[]}
+  {
+    id: 'L01', source: 'loudspeaker', start: 0.7, end: 7.2, speaker: 'S1', quality: 'distorted',
+    text: text(
+      'This is the bank counter. You retired late last year, and both of your pension payments have arrived. Shall we proceed with that term deposit [unclear]?',
+      '这里是银行柜台。您去年底办了退休，两笔养老金都已到账。那笔定期存款[听不清]，还按刚才说的办吗？'
+    ),
+  },
+  { id: 'W02', source: 'wearer', start: 7.6, end: 9.5, keywords: zh ? ['定期', '按刚才说的办'] : ['term deposit', 'as discussed'] },
+  {
+    id: 'L03', source: 'loudspeaker', start: 10.0, end: 14.9, speaker: 'S1', quality: 'distorted',
+    text: text(
+      'Your balance is a little over 80,000 after the pension payments. Would you like to keep some of it available for daily expenses [unclear]?',
+      '两笔养老金到账后，您的账户余额是八万多。要不要留一部分做日常开销[听不清]？'
+    ),
+  },
+  { id: 'W04', source: 'wearer', start: 15.4, end: 18.6, keywords: zh ? ['一万', '活期', '其余转定期'] : ['ten thousand', 'available', 'rest into the term deposit'] },
 ];
+
+const exampleResult = {
+  dialogue: text(
+    'A bank representative confirms the wearer’s pension payments. The wearer keeps part of the balance available and puts the rest into a term deposit.',
+    '银行柜台人员确认佩戴者的养老金已到账。佩戴者决定留一部分活期，其余转入定期。'
+  ),
+  links: [
+    text('L01 is from the loudspeaker. The speaker introduces the bank counter and addresses the wearer about their retirement and pension.', 'L01 来自扬声器端。说话人表明自己在银行柜台，并向佩戴者确认其退休和养老金到账情况。'),
+    text('W02 and W04 are wearer fragments. They respond to the proposal in L01 and the question about available funds in L03.', 'W02 和 W04 属于佩戴者，分别回应 L01 的定期存款提议和 L03 关于保留活期资金的问题。'),
+    text('Retirement and pension receipts suggest a possible later life stage. The balance and deposit allocation are financial details of the wearer’s account.', '退休与领取养老金提供大致人生阶段的线索。余额和存款分配属于佩戴者账户的金融信息。'),
+  ],
+  profile: {
+    remote_role: { label: text('Bank counter representative', '银行柜台人员'), evidence: ['L01'] },
+    identity: { label: text('Retiree receiving a pension', '领取养老金的退休人员'), evidence: ['L01', 'L03'] },
+    scene: { label: text('Pension receipts and a term deposit', '养老金到账与定期配置'), evidence: ['L01', 'W02', 'L03', 'W04'] },
+    age_group: { label: text('Possibly an older adult (low confidence)', '可能为年长成年人（低置信度）'), evidence: ['L01'] },
+    financial_sensitivity: { label: text('High · balance and deposit allocation', '高 · 账户余额与存款分配'), evidence: ['L03', 'W04'] },
+  },
+};
+
 function loadExample(){
  if(!confirmReplace())return;
  invalidate();segments=validateSegments(clone(exampleRows));cancelEdit();renderAll();assemble();
- say(text('Illustrative example loaded. Run the rule demo to inspect the supporting evidence.','说明性示例已加载。运行规则演示，查看各项结果的支持证据。'));
+ showResult(exampleResult,'example');
+ say(text('Pension dialogue example loaded.','养老金对话示例已加载。'));
+ $('analysisStatus').textContent=text('These authored example judgments illustrate how to attribute evidence to each speaker.','这里展示预先编写的示例判断。点击证据编号可查看每项判断的来源。');
 }
 $('loadExample').addEventListener('click',loadExample);
 const entryParams=new URLSearchParams(location.search),caseId=entryParams.get('case');
@@ -151,6 +191,6 @@ function loadDialogueCase(id){
  }catch(error){say(text('Could not load this dialogue case. Open the case library and try again.','该对话案例无法加载，请从案例页重新打开。'),true)}
 }
 if(caseId&&!segments.length)loadDialogueCase(caseId);
-else if(entryParams.get('example')==='verification'&&!segments.length)loadExample();
+else if(['pension','verification'].includes(entryParams.get('example'))&&!segments.length)loadExample();
 
 })();
