@@ -87,10 +87,9 @@ function bindEvidenceButtons(container) {
 }
 
 function showResult(output, mode) {
-  const privacyExposure = mode === 'example'
-    ? output.privacy_exposure
-    : normalizeExposure?.(output.privacy_exposure, segments) ?? [];
-  result = { ...output, privacy_exposure: privacyExposure, mode, language: lang };
+  const items = output.privacy_information ?? output.privacy_exposure;
+  const privacyInformation = mode === 'example' ? items : normalizeExposure?.(items, segments) ?? [];
+  result = { ...output, privacy_information: privacyInformation, privacy_exposure: privacyInformation, mode, language: lang };
   $('meaning').textContent = output.dialogue || text('No conversation link established', '尚未建立对话关联');
   $('chain').innerHTML = (Array.isArray(output.links) ? output.links : []).map(link => `<div>${esc(link)}</div>`).join('');
   const fields = [
@@ -107,8 +106,8 @@ function showResult(output, mode) {
     return `<div class="attr"><label>${label}</label><strong>${esc(field.label || text('Undetermined', '未确定'))}</strong>${evidenceButtons(refs)}</div>`;
   }).join('');
   const exposureGrid = $('exposureGrid');
-  if (exposureGrid && privacyExposure.length) {
-    exposureGrid.innerHTML = privacyExposure.map(item => {
+  if (exposureGrid && privacyInformation.length) {
+    exposureGrid.innerHTML = privacyInformation.map(item => {
       const label = text(...exposureLabels[item.category]);
       const status = item.status === 'supported' ? text('Evidence supported', '证据支持') : text('Possible exposure', '线索待核');
       const detail = item.detail ? `<p class="help">${esc(item.detail)}</p>` : '';
@@ -242,10 +241,10 @@ const exampleResult = {
     text('L03 identifies a change in the account balance after the payments. The before and after figures are masked in L03.', 'L03 的「万活期」与 W04 开头的「1」对上，得到留 1 万元作活期。L03 中到账前后的余额数字被遮盖。'),
     text('Retirement and pension receipts suggest a possible later life stage. The pension and deposit plans concern the wearer’s finances.', '退休和养老金到账为判断佩戴者的大致人生阶段提供线索。养老金与存款安排属于佩戴者的金融信息。'),
   ],
-  privacy_exposure: [
+  privacy_information: [
     {
       category: 'authentication', status: 'supported', evidence: ['W02'],
-      detail: text('A six-digit verification code is mentioned. Its digits are masked in this report.', '提到一组 6 位验证码，清单中遮盖具体数字。'),
+      detail: text('W02 contains the complete example verification code: 739650.', '佩戴者侧 W02 给出了完整的示例验证码 739650。'),
     },
     {
       category: 'account_identifier', status: 'supported', evidence: ['L01', 'W02'],

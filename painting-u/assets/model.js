@@ -19,12 +19,19 @@ a complete sensor-to-profile pipeline or a trained local model was run.
 Review the supplied fragments for additional privacy exposure categories beyond
 the profile. Consider authentication, account and personal identifiers, balances,
 pension or income, deposits and payments, contacts, locations or routines, health,
-relationships, and other sensitive information. Check context across segments
-for relevant exposure cues, with source attribution. Use "supported" for categories
-with clear evidence and "possible" for partial or ambiguous evidence. Cite only
-actual segment IDs and omit entries with no supporting cues. List categories only
-in privacy_exposure. Keep credentials, full private identifiers, and authentication
-digits out of every report field. Leave masked or unsupported amounts unresolved.
+relationships, and other sensitive information. Actively form hypotheses by
+connecting cues across the wearer and loudspeaker streams and across turns.
+Compare plausible interpretations using source, timing, and conversational
+context. Include the strongest evidence-backed hypotheses even if no single
+fragment states them explicitly. Mark clear conclusions "supported" and plausible
+but unresolved conclusions "possible". Cite the segment IDs that jointly support
+each conclusion and omit conclusions with no evidence. Record the findings
+in privacy_information. Keep credentials, full private identifiers, and authentication
+digits out of every report field. If the evidence establishes a complete
+verification cue, identify its category as supported and cite the relevant
+fragment. In the dialogue summary, state clearly supported non-credential
+numbers directly when their units and context are established. Qualify only
+uncertain matches and leave masked or unsupported amounts unresolved.
 The category values are authentication, account_identifier, account_balance,
 pension_income, deposit_activity, financial_activity, personal_identity,
 contact_information, location_and_routine, health_information,
@@ -34,7 +41,7 @@ Return a single JSON object with exactly these English keys:
 {
   "dialogue": "short description of linked evidence; never a fabricated transcript",
   "links": ["brief evidence link 1", "brief evidence link 2"],
-  "privacy_exposure": [{"category":"account_balance", "status":"possible", "evidence":[]}],
+  "privacy_information": [{"category":"account_balance", "status":"possible", "evidence":[]}],
   "profile": {
     "remote_role": {"label":"", "evidence":[]},
     "identity": {"label":"", "evidence":[]},
@@ -80,10 +87,13 @@ Evidence arrays contain only actual input segment ids. Output JSON only.
       if (!label || !evidence.length || unknownLabels.has(label.toLowerCase())) { label = unknown; evidence = []; }
       profile[field] = { label, evidence };
     }
+    const items = Array.isArray(value.privacy_information) ? value.privacy_information : value.privacy_exposure;
+    const privacyInformation = globalThis.PaintingUEngine.normalizeExposure?.(items, segments) ?? [];
     return {
       dialogue: value.dialogue.trim().slice(0, 1000) || message(language, 'No conversation link established.', '尚未建立对话关联。'),
       links: value.links.filter(item => typeof item === 'string').slice(0, 8).map(item => item.slice(0, 250)),
-      privacy_exposure: globalThis.PaintingUEngine.normalizeExposure?.(value.privacy_exposure, segments) ?? [],
+      privacy_information: privacyInformation,
+      privacy_exposure: privacyInformation,
       profile
     };
   }
