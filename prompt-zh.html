@@ -4,6 +4,14 @@
 <p>提示词首先约束证据归属：在组合与解释恢复出的线索之前，先确定每条线索来自谁。可以进行适当的证据间的可靠联系，但不要猜测。无法确定归属的片段保持未分配状态。在此基础上，各隐私维度采用相应的推理规则：</p>
 <div class="table-wrap"><table><thead><tr><th scope="col">维度</th><th scope="col">推理规则</th></tr></thead><tbody><tr><td>身份</td><td>优先采用明确的身份线索。线索不完整时，仅依据与佩戴者有关且相互印证的证据推断；证据不足时返回“unknown”。</td></tr><tr><td>场景</td><td>根据上下文判断实际交互或业务场景，避免凭单个关键词确定场景。</td></tr><tr><td>年龄段</td><td>缺少明确年龄线索时，仅根据有依据的角色与上下文推断粗粒度年龄范围。</td></tr><tr><td>金融敏感度</td><td>同时考虑财务证据本身、数值金额的大小，以及这些金额在具体上下文中的意义。</td></tr></tbody></table></div>
 <p>出于安全考虑，本次公开内容限于提示词构建原则与供学术参考的代表性实例，不发布完整的 Painting U 隐私推理框架，包括全部场景模板、推理规则和提示词编排策略。</p>
+<h2 id="privacy-exposure">交互演示的 Prompt 与隐私信息输出</h2>
+<p>模型会主动把佩戴者侧关键词和扬声器端跨轮次的线索联系起来，结合说话人归属、时间和对话上下文提出隐私推断，即使单个片段没有明说。优先报告证据最充分的解释。线索相互印证时标为「证据支持」，仍存在多种合理解释时标为「线索待核」，并列出支撑判断的片段编号。</p>
+<p>新增的 <code>privacy_information</code> 位于 JSON 顶层，记录每项发现的类别、证据状态和片段编号。单位与指代明确时，直接在对话摘要中写出已匹配的非凭证数字。模型分析通过类别和证据编号记录认证线索。第 08 组内置演示的固定示例值由 W02 提供。</p>
+<pre tabindex="0" aria-label="工作台输出示意"><code>{
+  &quot;privacy_information&quot;: [
+    {&quot;category&quot;: &quot;account_balance&quot;, &quot;status&quot;: &quot;possible&quot;, &quot;evidence&quot;: [&quot;L03&quot;, &quot;W04&quot;]}
+  ]
+}</code></pre>
 <h2>Prompt 构建</h2>
 <p>本项目提供 Painting U 的 Prompt 构建说明与英文模板。<a href="painting-u-representative-prompt.txt">纯文本版本</a>包含相同的模板内容。</p>
 <pre tabindex="0"><code>Painting U: Reconstruction and Privacy Profile Inference
@@ -54,9 +62,6 @@ Return one valid JSON object with no additional text:
 <h2>输出格式与 Naive 基线</h2>
 <p>JSON schema 用于统一模型输出，便于自动解析和评估；它属于输出格式约束，本身不构成推理机制。论文评估中的 <strong>Naive</strong> 基线接收相同的恢复证据，并遵循相同的输出 schema，但不接收 Painting U 的证据归属规则、各属性的推理指导或其他推理约束。这一设计控制了输出格式的影响，使评估关注提示词构建本身的贡献。</p>
 <h2>与交互演示的关系</h2>
-<p>上述研究代表实例与<a href="painting-u/zh.html">交互演示</a>使用不同的输出 schema。交互演示的<a href="painting-u/server.py">本地服务</a>在模型模式下执行独立的演示提示词，返回 <code>dialogue</code>、<code>links</code>、<code>privacy_exposure</code> 和嵌套的 <code>profile</code> 对象。<code>profile</code> 除四个隐私维度外还包含 <code>remote_role</code>，各字段包含 <code>label</code> 与 <code>evidence</code>，不含 <code>confidence</code>。上述代表实例则将四个属性置于顶层，并包含 <code>confidence</code> 字段。</p>
+<p>上述研究代表实例与<a href="painting-u/zh.html">交互演示</a>使用不同的输出 schema。交互演示的<a href="painting-u/server.py">本地服务</a>在模型模式下执行独立的演示提示词，返回 <code>dialogue</code>、<code>links</code>、<code>privacy_information</code> 和嵌套的 <code>profile</code> 对象。<code>profile</code> 除四个隐私维度外还包含 <code>remote_role</code>，各字段包含 <code>label</code> 与 <code>evidence</code>，不含 <code>confidence</code>。上述代表实例则将四个属性置于顶层，并包含 <code>confidence</code> 字段。</p>
 <p>网页中的本地规则分析使用浏览器内的确定性演示逻辑，不执行上述代表性提示词，也不调用 LLM。交互演示接收文本证据，尚未实现从原始 IMU 数据到隐私画像的完整流水线。这些文档用于说明研究代表性提示词，不改变现有交互演示的推理行为。</p>
-<h2 id="privacy-exposure">交互演示的隐私暴露检查</h2>
-<p>工作台的模型提示词要求在画像之外主动检查更多有证据的隐私暴露类别，例如认证凭证、账户标识、余额变动、养老金、位置规律和健康信息。跨片段关联以来源、时间和上下文为依据。清楚的线索标为「证据支持」，片段残缺或归属不清时标为「线索待核」。</p>
-<p>结果中的 <code>privacy_exposure</code> 记录类别、状态和证据编号。认证凭证仅列类别。被遮蔽的金额保持待核。</p>
 </main><footer class="container footer"><span>Vib²Eve · Painting U</span><a href="zh.html">返回项目主页 ↑</a></footer></body></html>
