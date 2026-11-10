@@ -69,7 +69,22 @@ const analysisModeLabels = {
   example: text('Illustrative judgments', '示例判断'),
 };
 function showResult(output,mode){result={...output,mode,language:lang};$('meaning').textContent=output.dialogue||text('No conversation link established','尚未建立对话关联');$('chain').innerHTML=(Array.isArray(output.links)?output.links:[]).map(link=>`<div>${esc(link)}</div>`).join('');const fields=[['remote_role',text('Remote role','远端角色')],['identity',text('Wearer identity','佩戴者身份')],['scene',text('Conversation context','对话情境')],['age_group',text('Age group','年龄段')],['financial_sensitivity',text('Financial sensitivity','金融敏感度')]];$('profileGrid').innerHTML=fields.map(([name,label])=>{const field=output.profile?.[name]||{},refs=Array.isArray(field.evidence)?field.evidence.filter(id=>segments.some(s=>s.id===id)):[];return `<div class="attr"><label>${label}</label><strong>${esc(field.label||text('Undetermined','未确定'))}</strong>${refs.length?`<div class="why">${refs.map(id=>`<button class="ref" data-ref="${esc(id)}" title="${text('View evidence','查看证据')}">${esc(id)}</button>`).join('')}</div>`:''}</div>`}).join('');$('profileGrid').querySelectorAll('[data-ref]').forEach(button=>button.onclick=()=>{const ev=[...$('evidenceLog').children].find(el=>el.dataset.evidence===button.dataset.ref);if(ev){ev.scrollIntoView({behavior:'smooth',block:'center'});ev.classList.add('highlight');setTimeout(()=>ev.classList.remove('highlight'),2000)}});$('rawResult').textContent=JSON.stringify(result,null,2);$('analysisMode').textContent=analysisModeLabels[mode];$('exportResult').disabled=false;setStep(4)}
-$('localRun').onclick=()=>{if(!assembled.length&&!assemble())return;if(controller){controller.abort();controller=null}showResult(analyzeLocally(assembled,lang),'local');$('analysisStatus').textContent=text('Rule demo complete. Preset rules were used; no language model was called. Inspect each result’s evidence.','规则演示已完成：采用预设规则，未调用大模型。可点击引用查看证据。')};
+$('localRun').onclick = () => {
+  if (!assembled.length && !assemble()) return;
+  if (controller) {
+    controller.abort();
+    controller = null;
+  }
+  if (JSON.stringify(assembled) === exampleEvidenceSignature) {
+    showExampleJudgments();
+    return;
+  }
+  showResult(analyzeLocally(assembled, lang), 'local');
+  $('analysisStatus').textContent = text(
+    'Local rule analysis complete. Inspect each result’s evidence.',
+    '本地规则分析已完成。可点击引用查看证据。'
+  );
+};
 function modelConnection() {
   $('serverStatus').textContent = backend ? text('Local proxy ready', '本地代理已就绪') : text('Browser connection', '浏览器直连');
   let destination = '';
@@ -159,6 +174,7 @@ const exampleRows = [
   // Keep the digit words in the utterance. English amounts are read as quantities.
   { id: 'W04', source: 'wearer', start: 28.4, end: 33.6, keywords: zh ? ['1', '7', '2'] : ['two'] },
 ];
+const exampleEvidenceSignature = JSON.stringify(validateSegments(exampleRows));
 
 const exampleResult = {
   dialogue: text(
@@ -179,12 +195,19 @@ const exampleResult = {
   },
 };
 
+function showExampleJudgments() {
+  showResult(exampleResult, 'example');
+  $('analysisStatus').textContent = text(
+    'Showing the authored judgments for the built-in example. Select a reference to inspect its evidence.',
+    '已显示内置示例的预设判断。点击证据编号可查看每项判断的来源。'
+  );
+}
+
 function loadExample(){
  if(!confirmReplace())return;
  invalidate();segments=validateSegments(clone(exampleRows));cancelEdit();renderAll();assemble();
- showResult(exampleResult,'example');
+ showExampleJudgments();
  say(text('Pension dialogue example loaded.','养老金对话示例已加载。'));
- $('analysisStatus').textContent=text('These authored example judgments illustrate how to attribute evidence to each speaker.','这里展示预先编写的示例判断。点击证据编号可查看每项判断的来源。');
 }
 $('loadExample').addEventListener('click',loadExample);
 const entryParams=new URLSearchParams(location.search),caseId=entryParams.get('case');
