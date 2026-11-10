@@ -10,9 +10,36 @@
 html[lang="zh-CN"] [data-dialogue-language="en"],html[lang="en"] [data-dialogue-language="zh"]{display:none}
 .dialogue-page{max-width:1040px}.dialogue-intro{padding-block:52px 30px}.dialogue-intro h1{font:400 clamp(32px,4vw,46px)/1.4 var(--serif);letter-spacing:0;margin-bottom:20px}.dialogue-intro .lead{max-width:960px;font-size:19px;line-height:1.9}.dialogue-facts{display:flex;gap:12px 28px;flex-wrap:wrap;font-size:16px;color:var(--blue)}.dialogue-legend{font-size:16px;color:var(--muted);margin-top:19px;margin-bottom:0}.dialogue-jump{display:flex;gap:22px;align-items:center;padding-block:21px;border-top:1px solid var(--line)}.dialogue-jump label{font-size:16px;font-weight:600;color:var(--ink);white-space:nowrap}.jump-select{font:17px var(--sans);color:var(--ink);border:1px solid #bfcad7;border-radius:4px;padding:11px 14px;min-height:46px;width:min(520px,100%);background:white}.jump-select:focus-visible{outline:3px solid #83a8d2;outline-offset:3px}.dialogue-card{border-top:1px solid var(--line);padding:34px 0 40px;scroll-margin-top:28px}.dialogue-heading{display:flex;gap:22px;align-items:baseline;margin-bottom:24px}.dialogue-number{font:25px var(--serif);color:var(--blue)}.dialogue-heading h2{font:400 29px/1.5 var(--serif);letter-spacing:0;margin-bottom:7px}.participant-count{font-size:15px;color:var(--muted);margin:0}.dialogue-turn{display:grid;grid-template-columns:155px minmax(0,1fr);gap:20px;padding:16px 20px;margin-bottom:12px;border-left:3px solid var(--remote);background:#f3f6fa}.dialogue-turn.wearer{border-left-color:var(--wearer);background:#faf5f2}.turn-label{font-size:15px;font-weight:650;line-height:1.9;color:var(--remote);padding-top:3px}.wearer .turn-label{color:var(--wearer)}.turn-text{font-size:19px;line-height:1.95;margin:0;overflow-wrap:anywhere}.turn-text mark{background:#e8d5c8;color:#613925;padding:1px 3px;border-bottom:2px solid var(--wearer)}
 @media(max-width:680px){.dialogue-intro{padding-top:33px}.dialogue-intro .lead{font-size:18px}.dialogue-jump{display:grid;gap:9px}.jump-select{width:100%;min-width:0}.dialogue-heading{gap:15px}.dialogue-heading h2{font-size:25px}.dialogue-turn{grid-template-columns:minmax(0,1fr);gap:5px;padding:14px 16px}.turn-text{font-size:18px}.dialogue-card{padding-block:27px 30px}}
+
+.keyword-vocabulary{padding:24px 0 26px;border-top:1px solid var(--line)}
+.keyword-vocabulary h2{font:400 24px/1.5 var(--serif);margin:0 0 8px}
+.keyword-vocabulary p{font-size:16px;color:var(--muted);margin:0 0 12px}
+.keyword-vocabulary ul{display:flex;flex-wrap:wrap;gap:8px;margin:0;padding:0;list-style:none}
+.keyword-vocabulary li{padding:3px 10px;background:#faf5f2;color:#613925;border:1px solid #e8d5c8;border-radius:4px;font-size:16px}
 </style>
 </head><body>
 <a data-zh="跳转到正文" data-en="Skip to content" class="skip-link" href="#main">跳转到正文</a><header class="masthead"><div class="nav-wrap"><a class="wordmark" id="homeBrand" href="zh.html" aria-label="Vib squared Eve">Vib<sup>2</sup>Eve<span class="wordmark-dot"></span></a><nav aria-label="Main navigation"><a data-zh="项目主页" data-en="Project homepage" id="homeLink" href="zh.html">项目主页</a><a data-zh="Painting U 工作台" data-en="Painting U workspace" id="workspaceLink" href="painting-u/zh.html">Painting U 工作台</a><a data-zh="Prompt 构建" data-en="Prompt construction" id="promptLink" href="prompt-zh.html">Prompt 构建</a></nav><div class="nav-end"><a class="language" id="dialogueLanguage" href="cases.html?lang=en" lang="en">EN</a></div></div></header><main class="container dialogue-page" id="main"><section class="dialogue-intro"><p data-zh="Vib²Eve / 训练对话案例" data-en="Vib²Eve / TRAINING DIALOGUE CASES" class="eyebrow">Vib²Eve / 训练对话案例</p><h1 data-zh="用于训练的对话案例" data-en="Dialogue cases used for training" >用于训练的对话案例</h1><p data-zh="以下为用于训练的对话案例，涵盖 VR 协作、远程会诊、支付与账户验证等隐私泄露情景。每组均按发言顺序展示佩戴者端与扬声器端的完整交流。" data-en="These dialogue cases are used for training and cover privacy leakage during VR collaboration, remote consultations, payments, and account verification. Each exchange presents the wearer and loudspeaker turns in speaking order." class="lead">以下为用于训练的对话案例，涵盖 VR 协作、远程会诊、支付与账户验证等隐私泄露情景。每组均按发言顺序展示佩戴者端与扬声器端的完整交流。</p><div class="dialogue-facts"><span data-zh="共 30 组文本：中文 15 组 · 英文 15 组" data-en="30 texts: 15 in Chinese · 15 in English" >共 30 组文本：中文 15 组 · 英文 15 组</span><span data-zh="多人情景包含 3–5 位实际发言者" data-en="Multi-party scenes include 3–5 actual speakers" >多人情景包含 3–5 位实际发言者</span></div><p data-zh="中英文分别呈现相同的 15 个情景。佩戴者侧原有关键词保留高亮；全部对话直接展开，供阅读和展示。" data-en="Chinese and English present the same 15 scenarios. Original wearer keywords remain highlighted, and all conversations are displayed in full." class="dialogue-legend">中英文分别呈现相同的 15 个情景。佩戴者侧原有关键词保留高亮；全部对话直接展开，供阅读和展示。</p></section>
+<section class="keyword-vocabulary" aria-labelledby="keyword-title">
+  <h2 id="keyword-title" data-zh="佩戴者侧的 15 个目标关键词" data-en="15 target keywords on the wearer side">佩戴者侧的 15 个目标关键词</h2>
+  <p data-zh="每种语言的识别词表包含 10 个数字词和 5 个隐私相关词。" data-en="The recognition vocabulary for each language includes 10 number words and 5 privacy-related terms.">每种语言的识别词表包含 10 个数字词和 5 个隐私相关词。</p>
+  <ul>
+    <li data-zh="0" data-en="zero">0</li>
+    <li data-zh="1" data-en="one">1</li>
+    <li data-zh="2" data-en="two">2</li>
+    <li data-zh="3" data-en="three">3</li>
+    <li data-zh="4" data-en="four">4</li>
+    <li data-zh="5" data-en="five">5</li>
+    <li data-zh="6" data-en="six">6</li>
+    <li data-zh="7" data-en="seven">7</li>
+    <li data-zh="8" data-en="eight">8</li>
+    <li data-zh="9" data-en="nine">9</li>
+    <li data-zh="号码" data-en="number">号码</li>
+    <li data-zh="年龄" data-en="age">年龄</li>
+    <li data-zh="验证码" data-en="verification">验证码</li>
+    <li data-zh="尾号" data-en="phone-number-suffix">尾号</li>
+    <li data-zh="余额" data-en="balance">余额</li>
+  </ul>
+</section>
 <section class="dialogue-language" data-dialogue-language="zh" lang="zh-CN"><div class="dialogue-jump"><label for="jump-zh">跳转至情景</label><select id="jump-zh" class="jump-select"><option value="">选择情景跳转</option><option value="dialogue-zh-01">01 · 备课与素材采购</option><option value="dialogue-zh-02">02 · 查房协作与药费垫付</option><option value="dialogue-zh-03">03 · 财务对账与资金划转</option><option value="dialogue-zh-04">04 · 工地验收与个人垫款</option><option value="dialogue-zh-05">05 · 教务登记与学习账户续费</option><option value="dialogue-zh-06">06 · 演出排练与账号年龄校验</option><option value="dialogue-zh-07">07 · 商城退款与钱包余额</option><option value="dialogue-zh-08">08 · 养老金到账与定期配置</option><option value="dialogue-zh-09">09 · 看房签约与押金扣款</option><option value="dialogue-zh-10">10 · 税务申报与贷款信息</option><option value="dialogue-zh-11">11 · 二手设备交易与收款确认</option><option value="dialogue-zh-12">12 · 远程会诊与医保结算</option><option value="dialogue-zh-13">13 · 课程报名与学习账户</option><option value="dialogue-zh-14">14 · 私教报名与运动档案</option><option value="dialogue-zh-15">15 · 套餐变更与欠费</option></select></div>
 <article class="dialogue-card" id="dialogue-zh-01"><header class="dialogue-heading"><span class="dialogue-number">01</span><div><h2>备课与素材采购</h2><p class="participant-count">5 人发言（含佩戴者）</p></div></header>
 <div class="dialogue-turn loudspeaker"><span class="turn-label">扬声器端 · S1</span><p class="turn-text">明天的公开课，我们趁九点教研会结束前把最后一节过完。你先把第三节板书放到共享白板上，我这边能直接批注。</p></div>
