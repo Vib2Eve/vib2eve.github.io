@@ -223,8 +223,8 @@ const exampleRows = [
   {
     id: 'L03', source: 'loudspeaker', start: 23.0, end: 27.9, speaker: 'S1', quality: 'distorted',
     text: text(
-      'The account [unclear] after the two pension payments [unclear]. Do you want to leave [unclear] accessible [unclear]?',
-      '账户［听不清］两笔养老金到账后［听不清］你要留［听不清］活期［听不清］？'
+      'The account balance [unclear] after the two pension payments [unclear]. Do you want to leave [unclear] accessible [unclear]?',
+      '账户余额原来［听不清］，两笔养老金到账后［听不清］。你要留［听不清］万活期［听不清］？'
     ),
   },
   // Keep the digit words in the utterance. English amounts are read as quantities.
@@ -234,12 +234,12 @@ const exampleEvidenceSignature = JSON.stringify(validateSegments(exampleRows));
 
 const exampleResult = {
   dialogue: text(
-    'The exchange likely concerns a term deposit after pension payments arrived. The wearer’s final number words may relate to how much to keep available.',
-    '这段交流可能是在讨论养老金到账后的定期存款安排。佩戴者最后说出的数字可能与保留活期的金额有关。'
+    'The bank counter representative and the wearer discuss a term deposit after two pension payments arrive. The quoted annual rate is 4.0%.',
+    '银行柜台人员与佩戴者在两笔养老金到账后商议定期存款，年利率为 4.0%，留 1 万元作活期。'
   ),
   links: [
-    text('L01 and L03 link a counter, a term deposit, and pension payments. Together they suggest that the loudspeaker is a bank representative speaking to a retired customer.', 'L01 和 L03 合起来提供了柜台、定期存款和养老金到账的线索。扬声器端可能是银行柜台人员，佩戴者可能是办理业务的退休客户。'),
-    text('W02 contains a verification keyword and several digit cues. W04 follows the question about available funds in L03, which gives its number words a likely financial context. The amount remains undetermined.', 'W02 中的验证码关键词和数字提供了核验线索。W04 紧接 L03 关于活期的提问，数字可能与资金分配有关，具体金额待定。'),
+    text('L01 and L03 identify the bank counter, pension payments, and the term deposit. W02 supplies the digits for the card suffix and annual rate.', 'L01 和 L03 确定了柜台业务、养老金到账和定期存款的语境。W02 提供了收款卡尾号和定期利率所对应的数字。'),
+    text('L03 identifies a change in the account balance after the payments. The before and after figures are masked in L03.', 'L03 的「万活期」与 W04 开头的「1」对上，得到留 1 万元作活期。L03 中到账前后的余额数字被遮盖。'),
     text('Retirement and pension receipts suggest a possible later life stage. The pension and deposit plans concern the wearer’s finances.', '退休和养老金到账为判断佩戴者的大致人生阶段提供线索。养老金与存款安排属于佩戴者的金融信息。'),
   ],
   privacy_exposure: [
@@ -252,21 +252,21 @@ const exampleResult = {
       detail: text('The receiving card ends in 118. L01 identifies the card and W02 supplies its final digits.', '收款卡尾号为 118。L01 提到收款卡，W02 给出了对应的尾号。'),
     },
     {
-      category: 'account_balance', status: 'possible', evidence: ['L03', 'W04'],
-      detail: text('The balance likely changed after the pension payments. The before and after amounts remain undetermined.', '养老金到账后可能发生了余额变动，到账前后的余额金额待核。'),
+      category: 'account_balance', status: 'supported', evidence: ['L03'],
+      detail: text('The account balance changed after the two pension payments. The before and after figures are masked in L03.', '两笔养老金到账后，账户余额发生变动。L03 遮盖了到账前后的具体余额。'),
     },
     {
       category: 'pension_income', status: 'supported', evidence: ['L03'],
       detail: text('Two pension payments arrived.', '两笔养老金已到账。'),
     },
     {
-      category: 'deposit_activity', status: 'possible', evidence: ['L01', 'W02'],
-      detail: text('The annual rate may be 4.0%. L01 supplies the decimal and percentage context, and W02 contains the digits 4 and 0.', '定期年利率可能为 4.0%。L01 给出了百分比和小数点的语境，W02 保留了数字 4 和 0。'),
+      category: 'deposit_activity', status: 'supported', evidence: zh ? ['L01', 'W02', 'L03', 'W04'] : ['L01', 'W02'],
+      detail: text('The annual term-deposit rate is 4.0%. The decimal and percentage in L01 match the digits 4 and 0 in W02.', '定期年利率为 4.0%，留 1 万元作活期。利率来自 L01 与 W02 的匹配，活期金额来自 L03 与 W04 的匹配。'),
     },
   ],
   profile: {
-    remote_role: { label: text('Likely a bank counter representative', '可能是银行柜台人员'), evidence: ['L01', 'L03'] },
-    identity: { label: text('Likely a retiree receiving a pension', '可能是领取养老金的退休人员'), evidence: ['L01', 'L03'] },
+    remote_role: { label: text('Bank counter representative', '银行柜台人员'), evidence: ['L01', 'L03'] },
+    identity: { label: text('Retiree receiving a pension', '领取养老金的退休人员'), evidence: ['L01', 'L03'] },
     scene: { label: text('Pension receipts and a term deposit', '养老金到账与定期配置'), evidence: ['L01', 'W02', 'L03', 'W04'] },
     age_group: { label: text('Possibly an older adult (low confidence)', '可能为年长成年人（低置信度）'), evidence: ['L01', 'L03'] },
     financial_sensitivity: { label: text('High · pension and deposit plans', '高 · 养老金与存款安排'), evidence: ['L01', 'L03', 'W04'] },
