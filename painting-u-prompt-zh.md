@@ -81,7 +81,7 @@ Return one valid JSON object with no additional text:
 
 ## 输出格式与 Naive 基线
 
-JSON schema 用于统一模型输出，便于自动解析和评估；它属于输出格式约束，本身不构成推理机制。`privacy_information` 对应公开模板中的第五个维度。论文的四维画像评估中，**Naive** 基线接收相同的恢复证据，并遵循相同的输出 schema，但不接收 Painting U 的证据归属规则、各属性的推理指导或其他推理约束。这一设计控制了输出格式的影响，使评估关注提示词构建本身的贡献。
+JSON schema 用于统一模型输出，便于自动解析和评估；它属于输出格式约束，本身不构成推理机制。`privacy_information` 对应公开模板中的第五个维度。在五维对照中，**Naive** 基线接收相同的恢复证据，并遵循相同的输出 schema，但不接收 Painting U 的证据归属规则、各属性的推理指导或其他推理约束。这一设计控制了输出格式的影响，使评估关注提示词构建本身的贡献。
 
 ## 与交互演示的关系
 

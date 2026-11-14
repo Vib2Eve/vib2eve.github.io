@@ -71,7 +71,7 @@ Return one valid JSON object with no additional text:
   &quot;privacy_information&quot;: []
 }</code></pre>
 <h2>输出格式与 Naive 基线</h2>
-<p>JSON schema 用于统一模型输出，便于自动解析和评估；它属于输出格式约束，本身不构成推理机制。<code>privacy_information</code> 对应公开模板中的第五个维度。论文的四维画像评估中，<strong>Naive</strong> 基线接收相同的恢复证据，并遵循相同的输出 schema，但不接收 Painting U 的证据归属规则、各属性的推理指导或其他推理约束。这一设计控制了输出格式的影响，使评估关注提示词构建本身的贡献。</p>
+<p>JSON schema 用于统一模型输出，便于自动解析和评估；它属于输出格式约束，本身不构成推理机制。<code>privacy_information</code> 对应公开模板中的第五个维度。在五维对照中，<strong>Naive</strong> 基线接收相同的恢复证据，并遵循相同的输出 schema，但不接收 Painting U 的证据归属规则、各属性的推理指导或其他推理约束。这一设计控制了输出格式的影响，使评估关注提示词构建本身的贡献。</p>
 <h2>与交互演示的关系</h2>
 <p>上述研究代表实例与<a href="painting-u/zh.html">交互演示</a>使用不同的输出 schema。交互演示的<a href="painting-u/server.py">本地服务</a>在模型模式下执行独立的演示提示词，返回 <code>dialogue</code>、<code>links</code>、<code>privacy_information</code> 和嵌套的 <code>profile</code> 对象。<code>profile</code> 除四个隐私维度外还包含 <code>remote_role</code>，各字段包含 <code>label</code> 与 <code>evidence</code>，不含 <code>confidence</code>。上述代表实例则将四个属性置于顶层，并包含 <code>confidence</code> 字段。</p>
 <p>网页中的本地规则分析使用浏览器内的确定性演示逻辑，不执行上述代表性提示词，也不调用 LLM。交互演示接收文本证据，尚未实现从原始 IMU 数据到隐私画像的完整流水线。这些文档用于说明研究代表性提示词，不改变现有交互演示的推理行为。</p>

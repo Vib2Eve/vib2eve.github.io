@@ -81,7 +81,7 @@ Return one valid JSON object with no additional text:
 
 ## Output format and the Naive baseline
 
-The JSON schema standardizes model output for automatic parsing and evaluation. It is an output-format constraint, rather than part of the reasoning mechanism itself. The public template uses `privacy_information` for its fifth dimension. In the paper’s four-attribute evaluation, the **Naive** baseline receives the same recovered evidence and uses the same output schema. It does not receive Painting U's evidence-attribution rules, attribute-specific reasoning guidance, or other inference constraints. This controls for output formatting when evaluating the contribution of prompt construction.
+The JSON schema standardizes model output for automatic parsing and evaluation. It is an output-format constraint, rather than part of the reasoning mechanism itself. The public template uses `privacy_information` for its fifth dimension. For a five-attribute comparison, the **Naive** baseline receives the same recovered evidence and uses the same output schema. It does not receive Painting U's evidence-attribution rules, attribute-specific reasoning guidance, or other inference constraints. This controls for output formatting when evaluating the contribution of prompt construction.
 
 ## Relationship to the interactive demonstration
 
